@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logistics/maps.dart';
 import 'home.dart';
 import 'services.dart';
 import 'activity.dart';
@@ -29,7 +30,7 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
+    MapSample(),
     Activity(),
     Account(),
   ];
