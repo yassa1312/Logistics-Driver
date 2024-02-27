@@ -5,9 +5,7 @@ import 'services.dart';
 import 'activity.dart';
 import 'account.dart';
 
-void main() {
-  runApp(Home());
-}
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -51,8 +49,8 @@ class _HomeState extends State<Home> {
           },
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
+              icon: Icon(Icons.map),
+              label: 'Map',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.history),

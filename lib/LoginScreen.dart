@@ -15,9 +15,7 @@ import 'package:lottie/lottie.dart';
 
 void main() {
   runApp(
-    DevicePreview(
-      builder: (context) => const SignUpApp(),
-    ),
+    const SignUpApp(),
   );
 }
 
@@ -150,7 +148,7 @@ class LoginScreenState extends State<LoginScreen> {
 
 
   Future<void> loginUserAPI(String email, String password) async {
-    const String apiUrl = 'https://logisticsapinet820231222162219.azurewebsites.net/login'; // Replace with your actual API endpoint
+    const String apiUrl = 'http://www.logistics-api.somee.com/login'; // Replace with your actual API endpoint
 
     final Map<String, String> headers = {
       'Content-Type': 'application/json',

@@ -115,9 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textInputAction: TextInputAction.next,
                             obscureText: obscureText1,
                             onChanged: (password) {
-                              setState(() {
-                                strength = calculatePasswordStrength(password);
-                              });
+
                             },
                             decoration: InputDecoration(
                               labelText: 'Password',
@@ -141,11 +139,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: confirmPasswordController,
                             textInputAction: TextInputAction.done,
                             obscureText: obscureText1,
-                            onChanged: (password) {
-                              setState(() {
-                                strength = calculatePasswordStrength(password);
-                              });
-                            },
                             onFieldSubmitted: (_) {
                               String enteredPassword = confirmPasswordController.text;
                               String originalPassword = passwordController.text;
@@ -242,6 +235,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+  void onRegisterSuccess() async {
+    String email = emailController.text;
+    String name = nameController.text;
+    String phone = phoneNumberController.text;
+    String password = passwordController.text;
+    String confirmPassword = confirmPasswordController.text;
+
+    // Check if the passwords match
+    if (password == confirmPassword) {
+      // Check if the name is at least 3 characters
+      if (name.length < 4) {
+        displayToast("Name must be at least 3 characters.");
+        return;
+      }
+
+      // Check if the phone number is empty
+      if (phone.isEmpty) {
+        displayToast("Phone Number is mandatory.");
+        return;
+      }
+
+      // Attempt API registration
+      try {
+        bool registrationSuccess = await RegistrationAPI.registerUser(email, password, name, phone);
+
+        RegistrationAPI.displayRegistrationResult(registrationSuccess); // Call displayRegistrationResult
+
+        if (registrationSuccess) {
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      } catch (error) {
+        displayToast("Registration failed");
+      }
+    } else {
+      displayToast("Passwords do not match.");
+    }
+  }
+
+
   void displayToast(String message) {
     Fluttertoast.showToast(
       msg: message,
@@ -253,58 +289,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
       fontSize: 18.0,
     );
   }
-  void onRegisterSuccess() async {
-    String email = emailController.text;
-    String password = passwordController.text;
-    String confirmPassword = confirmPasswordController.text;
-
-    if (password == confirmPassword) {
-      bool registrationSuccess = await RegistrationAPI.registerUser(email, password);
-
-      if (registrationSuccess) {
-        displayToast( "Account Created!");
-
-        Navigator.pop(context);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      } else {
-        displayToast( "Registration failed. Please try again.");
-      }
-    } else {
-      displayToast( "Passwords do not match.");
-    }
-  }
 }
 
 class RegistrationAPI {
-  static Future<bool> registerUser(String email, String password) async {
+  static Future<bool> registerUser(String email, String password, String phone, String name) async {
     var headers = {
-      'Accept': '*/*',
       'Content-Type': 'application/json',
-      'Cookie': 'ARRAffinity=908058b9e2be1479dd6b543a1483598c49313680b79a6118cf8ebe4a5a376c07; ARRAffinitySameSite=908058b9e2be1479dd6b543a1483598c49313680b79a6118cf8ebe4a5a376c07'
     };
-    var url = Uri.parse(
-        'https://logisticsapinet820231222162219.azurewebsites.net/register');
 
-    var body = json.encode({
+    var data = {
       "email": email,
       "password": password,
-    });
+      "phone": phone,
+      "name": name,
+    };
 
     try {
       var response = await http.post(
-        url,
+        Uri.parse('http://www.logistics-api.somee.com/api/Account/Register'),
         headers: headers,
-        body: body,
+        body: json.encode(data),
       );
 
       if (response.statusCode == 200) {
-        print(response.body);
         return true; // Successful registration
       } else {
-        print(response.reasonPhrase);
+        print(response.body);
         return false; // Unsuccessful registration
       }
     } catch (error) {
@@ -312,14 +322,30 @@ class RegistrationAPI {
       return false; // Error during registration
     }
   }
+
+  static void displayRegistrationResult(bool registrationSuccess) {
+    if (registrationSuccess) {
+      displayToast("Account created successfully!");
+    } else {
+      displayToast("Registration failed. Please try again.");
+    }
+  }
+
+  static void displayToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.orange,
+      textColor: Colors.white,
+      fontSize: 18.0,
+    );
+  }
 }
 
-  Future<void> saveUserData(String userData) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userData', userData);
-  }
 
-
-  double calculatePasswordStrength(String password) {
-    return 0.0;
-  }
+Future<void> saveUserData(String userData) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('userData', userData);
+}
