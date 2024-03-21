@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:logistics/PaymentPage.dart';
+import 'package:logistics/ProfilePage.dart';
+import 'package:logistics/RegisterCar.dart';
+import 'package:logistics/activity.dart';
 
 class NoteLine {
   final String text1;
@@ -55,12 +59,12 @@ class Account extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        //Navigator.push(
-                        //context,
-                        //MaterialPageRoute(
-                        //builder: (context) => HelpPage(),
-                        // ),
-                        //);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>ProfilePage(),
+                          ),
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -72,10 +76,10 @@ class Account extends StatelessWidget {
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.star, size: 40.0, color: Colors.white),
+                            Icon(Icons.person, size: 40.0, color: Colors.white),
                             SizedBox(height: 8.0),
                             Text(
-                              "Help",
+                              "Profile",
                               style: TextStyle(color: Colors.white),
                             ),
                           ],
@@ -87,12 +91,12 @@ class Account extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        //Navigator.push(
-                        //contex
-                        //MaterialPageRoute(
-                        //builder: (context) => PaymentPage(),
-                        //),
-                        //);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>PaymentPage(),
+                          ),
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -120,12 +124,12 @@ class Account extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        //Navigator.push(
-                        // context,
-                        // MaterialPageRoute(
-                        //  builder: (context) => ActivityPage(),
-                        //),
-                        //);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RegisterCar(),
+                          ),
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -137,11 +141,11 @@ class Account extends StatelessWidget {
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.music_note, size: 40.0,
+                            Icon(Icons.car_rental, size: 40.0,
                                 color: Colors.white),
                             SizedBox(height: 8.0),
                             Text(
-                              "Activity",
+                              "Car Data",
                               style: TextStyle(color: Colors.white),
                             ),
                           ],
@@ -158,6 +162,8 @@ class Account extends StatelessWidget {
     );
   }
 }
+
+
 
 
 

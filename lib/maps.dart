@@ -2,7 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:logistics/LoginScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -123,11 +128,31 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
+  // Function to clear user data
+  Future<void> clearUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userData');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Map"),
+        backgroundColor: Colors.orange,
+        title: const Text('Map', style: TextStyle(color: Colors.black)),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await clearUserData(); // Call the function to clear user data
+              // Navigate to the login screen or any other screen after logout
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()), // Replace LoginScreen with your actual login screen widget
+              );
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -154,3 +179,4 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
+

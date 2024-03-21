@@ -17,13 +17,23 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController roleController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
 
   bool obscureText1 = true;
   double strength = 0.0;
+  String userAutomation = 'driver';
+
+  @override
+  void initState() {
+    super.initState();
+    roleController.text = userAutomation; // Set initial value to userAutomation
+    roleController.addListener(_updateUserAutomation); // Add listener to roleController
+  }
 
   void togglePasswordVisibility1() {
     setState(() {
@@ -31,15 +41,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
+  void _updateUserAutomation() {
+    // Update the userAutomation variable with the text field value
+    setState(() {
+      userAutomation = roleController.text;
+    });
+  }
+
+  void _sendDataToAPI() {
+    print('Sending text to API: $userAutomation');
+  }
+
   @override
   void dispose() {
     super.dispose();
     emailController.dispose();
+    phoneNumberController.dispose();
+    nameController.dispose();
+    roleController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,9 +91,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.text,
+                      controller: nameController,
                       decoration: const InputDecoration(
                         labelText: 'Name',
-                        prefixIcon: Icon(Icons.email,color: Colors.orange,),
+                        prefixIcon: Icon(Icons.account_box,color: Colors.orange,),
                         labelStyle: TextStyle(
                           color: Colors.orange,
                         ),
@@ -82,6 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.phone,
+                      controller: phoneNumberController,
                       decoration: const InputDecoration(
                         labelText: 'Phone Number',
                         labelStyle: TextStyle(
@@ -115,7 +139,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textInputAction: TextInputAction.next,
                             obscureText: obscureText1,
                             onChanged: (password) {
-
                             },
                             decoration: InputDecoration(
                               labelText: 'Password',
@@ -144,7 +167,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               String originalPassword = passwordController.text;
 
                               if (enteredPassword == originalPassword) {
-
+                                _updateUserAutomation();
                                 onRegisterSuccess();
                               } else {
 
@@ -183,6 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           String password = passwordController.text;
                           String confirmPassword = confirmPasswordController.text;
                           if (password == confirmPassword) {
+                            _updateUserAutomation();
                             onRegisterSuccess();
                           } else {
                             Fluttertoast.showToast(msg: "Passwords do not match.");
@@ -239,6 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String email = emailController.text;
     String name = nameController.text;
     String phone = phoneNumberController.text;
+    String role = roleController.text;
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
@@ -258,7 +283,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Attempt API registration
       try {
-        bool registrationSuccess = await RegistrationAPI.registerUser(email, password, name, phone);
+        bool registrationSuccess = await RegistrationAPI.registerUser(email, password, name, phone, role);
 
         RegistrationAPI.displayRegistrationResult(registrationSuccess); // Call displayRegistrationResult
 
@@ -292,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 }
 
 class RegistrationAPI {
-  static Future<bool> registerUser(String email, String password, String phone, String name) async {
+  static Future<bool> registerUser(String email, String password ,String name,String phone, String role) async {
     var headers = {
       'Content-Type': 'application/json',
     };
@@ -300,8 +325,9 @@ class RegistrationAPI {
     var data = {
       "email": email,
       "password": password,
-      "phone": phone,
       "name": name,
+      "phone": phone,
+      "role":role
     };
 
     try {

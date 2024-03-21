@@ -1,10 +1,15 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:logistics/LoginScreen.dart';
 import 'package:logistics/maps.dart';
 import 'home.dart';
 import 'services.dart';
 import 'activity.dart';
 import 'account.dart';
 
+void main() {
+  runApp(const SignUpApp());
+}
 
 
 class MyApp extends StatelessWidget {

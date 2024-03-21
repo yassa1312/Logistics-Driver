@@ -1,0 +1,26 @@
+{
+  "project_info": {
+    "project_number": "720063316991",
+    "project_id": "logistics-driver-f88a5",
+    "storage_bucket": "logistics-driver-f88a5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720063316991:android:42b5f9eb442e96b3d3ddca",
+        "android_client_info": {
+          "package_name": "com.example.logistics_driver"
+        }
+      },
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+
+
+
