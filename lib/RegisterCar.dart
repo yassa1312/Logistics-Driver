@@ -17,11 +17,20 @@ class RegisterCar extends StatefulWidget {
 class _RegisterCarState extends State<RegisterCar> {
   final TextEditingController caR_VINController = TextEditingController();
   final TextEditingController plateNumController = TextEditingController();
-  final TextEditingController driverIdController = TextEditingController();
   final TextEditingController rideTypeController = TextEditingController();
   final TextEditingController colorController = TextEditingController();
   final TextEditingController carModelController = TextEditingController();
   final TextEditingController capacityController = TextEditingController();
+  final List<String> shipmentList = [
+    'Normal Truck',
+    'Large Truck',
+    'Flatbed',
+    'Refrigerated',
+    'Box',
+    'Tanker',
+    'Dump',
+    'Van Step',
+  ];
 
 
   @override
@@ -29,11 +38,11 @@ class _RegisterCarState extends State<RegisterCar> {
     super.dispose();
     caR_VINController.dispose();
     plateNumController.dispose();
-    driverIdController.dispose();
     rideTypeController.dispose();
     colorController.dispose();
     carModelController.dispose();
     capacityController.dispose();
+
   }
   @override
   Widget build(BuildContext context) {
@@ -66,7 +75,7 @@ class _RegisterCarState extends State<RegisterCar> {
                       keyboardType: TextInputType.text,
                       controller: caR_VINController,
                       decoration: const InputDecoration(
-                        labelText: ' caR_VI',
+                        labelText: 'CAR_VIN',
                         prefixIcon: Icon(Icons.numbers,color: Colors.orange,),
                         labelStyle: TextStyle(
                           color: Colors.orange,
@@ -80,7 +89,7 @@ class _RegisterCarState extends State<RegisterCar> {
                       keyboardType: TextInputType.text,
                       controller: plateNumController,
                       decoration: const InputDecoration(
-                        labelText: 'plateNum',
+                        labelText: 'Plate Num',
                         prefixIcon: Icon(Icons.confirmation_num_outlined,color: Colors.orange,),
                         labelStyle: TextStyle(
                           color: Colors.orange,
@@ -89,30 +98,51 @@ class _RegisterCarState extends State<RegisterCar> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    TextFormField(
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.phone,
-                      controller: driverIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'driverId',
-                        labelStyle: TextStyle(
-                          color: Colors.orange,
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Select your Truck'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: shipmentList.map((location) {
+                                    return ListTile(
+                                      title: Text(location),
+                                      onTap: () {
+                                        setState(() {
+                                          rideTypeController.text = location;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person,color: Colors.orange,),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: rideTypeController,
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        labelText: 'ride Type',labelStyle: TextStyle(
-                        color: Colors.orange,
-                      ),
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.local_shipping,color: Colors.orange,),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                rideTypeController.text.isEmpty ? 'Select Truck' : rideTypeController.text,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Icon(Icons.keyboard_arrow_down),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -125,7 +155,7 @@ class _RegisterCarState extends State<RegisterCar> {
                             controller: colorController,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
-                              labelText: 'color',
+                              labelText: 'Color',
                               labelStyle: const TextStyle(
                                 color: Colors.orange,
                               ),
@@ -140,7 +170,7 @@ class _RegisterCarState extends State<RegisterCar> {
                             onChanged: (password) {
                             },
                             decoration: InputDecoration(
-                              labelText: 'CarModel',
+                              labelText: 'Car Model',
                               labelStyle: const TextStyle(
                                 color: Colors.orange,
                               ),
@@ -152,8 +182,7 @@ class _RegisterCarState extends State<RegisterCar> {
                           TextFormField(
                             controller: capacityController,
                             textInputAction: TextInputAction.next,
-                            onChanged: (password) {
-                            },
+                            keyboardType: TextInputType.number, // Set keyboardType to accept numbers only
                             decoration: InputDecoration(
                               labelText: 'Capacity',
                               labelStyle: const TextStyle(
@@ -163,6 +192,7 @@ class _RegisterCarState extends State<RegisterCar> {
                               prefixIcon: const Icon(Icons.front_loader,color: Colors.orange,),
                             ),
                           ),
+
                         ],
                       ),
                     ),
@@ -200,15 +230,29 @@ class _RegisterCarState extends State<RegisterCar> {
   void onRegisterSuccess() async {
     String caR_VIN = caR_VINController.text;
     String plateNum = plateNumController.text;
-    String driverId = driverIdController.text;
     String rideType = rideTypeController.text;
     String color = colorController.text;
     String carModel = carModelController.text;
-    int capacity = int.tryParse(capacityController.text) ?? 0; // Convert to int
+    String capacity = capacityController.text; // Convert to string
 
     // Check if any required field is empty
-    if (caR_VIN.isEmpty || plateNum.isEmpty || driverId.isEmpty || rideType.isEmpty || color.isEmpty || carModel.isEmpty || capacity == 0) {
+    if (caR_VIN.isEmpty || plateNum.isEmpty || rideType.isEmpty || color.isEmpty || carModel.isEmpty || capacity.isEmpty) {
       displayToast("Please fill in all fields");
+      return;
+    }
+
+    // Attempt to parse capacity to int
+    int? parsedCapacity;
+    try {
+      parsedCapacity = int.parse(capacity);
+    } catch (e) {
+      displayToast("Capacity must be a number");
+      return;
+    }
+
+    // Check if capacity is 0
+    if (parsedCapacity == 0) {
+      displayToast("Capacity cannot be 0");
       return;
     }
 
@@ -227,11 +271,10 @@ class _RegisterCarState extends State<RegisterCar> {
         // Prepare data for registration
         var data = {
           "caR_VIN": caR_VIN,
-          "plateNum": plateNum,
-          "driverId": driverId,
-          "rideType": rideType,
+          "Plate_Num": plateNum,
+          "Ride_Type": rideType,
           "color": color,
-          "carModel": carModel,
+          "Car_Model": carModel,
           "capacity": capacity
         };
 
@@ -260,7 +303,6 @@ class _RegisterCarState extends State<RegisterCar> {
     }
   }
 
-
   void displayToast(String message) {
     Fluttertoast.showToast(
       msg: message,
@@ -273,15 +315,14 @@ class _RegisterCarState extends State<RegisterCar> {
     );
   }
 
-
-  static Future<bool> registerCar(String plateNum, String driverId, String rideType, String color, String carModel, int capacity) async {
+  static Future<bool> registerCar(String caR_VIN,String plateNum, String rideType, String color, String carModel, int capacity) async {
     var headers = {
       'Content-Type': 'application/json',
     };
 
     var data = {
+      "caR_VIN": caR_VIN,
       "plateNum": plateNum,
-      "driverId": driverId,
       "rideType": rideType,
       "color": color,
       "carModel": carModel,
