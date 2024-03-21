@@ -40,7 +40,6 @@ class _RegisterCarState extends State<RegisterCar> {
     colorController.dispose();
     carModelController.dispose();
     capacityController.dispose();
-
   }
   @override
   Widget build(BuildContext context) {
