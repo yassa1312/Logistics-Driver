@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logistics/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logistics/LoginScreen.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -312,39 +311,6 @@ class _RegisterCarState extends State<RegisterCar> {
       textColor: Colors.white,
       fontSize: 18.0,
     );
-  }
-
-  static Future<bool> registerCar(String caR_VIN,String plateNum, String rideType, String color, String carModel, int capacity) async {
-    var headers = {
-      'Content-Type': 'application/json',
-    };
-
-    var data = {
-      "caR_VIN": caR_VIN,
-      "plateNum": plateNum,
-      "rideType": rideType,
-      "color": color,
-      "carModel": carModel,
-      "capacity": capacity
-    };
-
-    try {
-      var response = await http.post(
-        Uri.parse('http://www.logistics-api.somee.com/api/Car/Register'),
-        headers: headers,
-        body: json.encode(data),
-      );
-
-      if (response.statusCode == 200) {
-        return true; // Successful registration
-      } else {
-        print(response.body);
-        return false; // Unsuccessful registration
-      }
-    } catch (error) {
-      print('Error during registration: $error');
-      return false; // Error during registration
-    }
   }
 
 
