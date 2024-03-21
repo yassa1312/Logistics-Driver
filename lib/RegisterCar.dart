@@ -13,7 +13,6 @@ class RegisterCar extends StatefulWidget {
   @override
   State<RegisterCar> createState() => _RegisterCarState();
 }
-
 class _RegisterCarState extends State<RegisterCar> {
   final TextEditingController caR_VINController = TextEditingController();
   final TextEditingController plateNumController = TextEditingController();
