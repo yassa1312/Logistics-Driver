@@ -120,6 +120,7 @@ class Account extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   const SizedBox(width: 8.0),
                   Expanded(
                     child: GestureDetector(
