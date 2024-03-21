@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 
 class RegisterCar extends StatefulWidget {
   const RegisterCar({Key? key}) : super(key: key);
-
   @override
   State<RegisterCar> createState() => _RegisterCarState();
 }
