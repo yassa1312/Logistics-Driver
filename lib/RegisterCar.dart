@@ -22,12 +22,12 @@ class _RegisterCarState extends State<RegisterCar> {
   final List<String> shipmentList = [
     'Normal Truck',
     'Large Truck',
-    'Flatbed',
-    'Refrigerated',
-    'Box',
-    'Tanker',
-    'Dump',
-    'Van Step',
+    'Flatbed Truck',
+    'Refrigerated Truck',
+    'Box Truck',
+    'Tanker Truck',
+    'Dump Truck',
+    'Van Step Truck',
   ];
 
 

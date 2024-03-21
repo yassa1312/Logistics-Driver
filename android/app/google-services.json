@@ -12,12 +12,7 @@
           "package_name": "com.example.logistics_driver"
         }
       },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBImLfjv1Z3txtjVfmjV-yGwog7rg2fj9g"
-        }
-      ],
+
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": []
