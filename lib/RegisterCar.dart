@@ -29,7 +29,6 @@ class _RegisterCarState extends State<RegisterCar> {
     'Van Step Truck',
   ];
 
-
   @override
   void dispose() {
     super.dispose();
