@@ -12,6 +12,12 @@
           "package_name": "com.example.logistics_driver"
         }
       },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR API KEY"
+        }
+      ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": []

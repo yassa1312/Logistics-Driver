@@ -65,33 +65,6 @@ class _RegisterCarState extends State<RegisterCar> {
                 ),
                 child: ListView(
                   children: [
-                    TextFormField(
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.text,
-                      controller: caR_VINController,
-                      decoration: const InputDecoration(
-                        labelText: 'CAR_VIN',
-                        prefixIcon: Icon(Icons.numbers,color: Colors.orange,),
-                        labelStyle: TextStyle(
-                          color: Colors.orange,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.text,
-                      controller: plateNumController,
-                      decoration: const InputDecoration(
-                        labelText: 'Plate Num',
-                        prefixIcon: Icon(Icons.confirmation_num_outlined,color: Colors.orange,),
-                        labelStyle: TextStyle(
-                          color: Colors.orange,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
@@ -140,6 +113,35 @@ class _RegisterCarState extends State<RegisterCar> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.text,
+                      controller: caR_VINController,
+                      decoration: const InputDecoration(
+                        labelText: 'CAR_VIN',
+                        prefixIcon: Icon(Icons.numbers,color: Colors.orange,),
+                        labelStyle: TextStyle(
+                          color: Colors.orange,
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.text,
+                      controller: plateNumController,
+                      decoration: const InputDecoration(
+                        labelText: 'Plate Num',
+                        prefixIcon: Icon(Icons.confirmation_num_outlined,color: Colors.orange,),
+                        labelStyle: TextStyle(
+                          color: Colors.orange,
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
