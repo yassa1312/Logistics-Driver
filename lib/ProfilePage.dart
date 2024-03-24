@@ -31,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (token != null) {
         var headers = {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token',//TODO make code be edit to driver
           'Content-Type': 'application/json', // Specify content type
         };
 
@@ -43,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
         // Prepare request body
         request.headers.addAll(headers);
         request.body = jsonEncode({
-          'password': 'Passw0rd', //TODO// Provide a valid password here
+          'password': 'Passw0rd', //TODO Provide a valid password here
           'name': _nameController.text,
           'email': _emailController.text,
           'phoneNumber': _phoneNumberController.text,
