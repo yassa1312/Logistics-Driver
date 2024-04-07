@@ -12,6 +12,8 @@ class _PaymentPageState extends State<PaymentPage> {
   late String _totalAmount = '';
   late List<String> _paymentMethods = [];
   late String _selectedPaymentMethod = '';
+  late String _userName = 'John Doe'; // Example user name
+  late String _userEmail = 'john.doe@example.com'; // Example user email
 
   @override
   void initState() {
@@ -33,7 +35,7 @@ class _PaymentPageState extends State<PaymentPage> {
         _totalAmount = data['totalAmount'];
         _paymentMethods = List<String>.from(data['paymentMethods']);
         _selectedPaymentMethod =
-            _paymentMethods.isNotEmpty ? _paymentMethods[0] : '';
+        _paymentMethods.isNotEmpty ? _paymentMethods[0] : '';
         _isLoading = false;
       });
     } catch (e) {
@@ -62,49 +64,73 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Total Amount: \$_totalAmount', // Display fetched total amount
-                      style: TextStyle(fontSize: 20, color: Colors.orange),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Payment Method:',
-                      style: TextStyle(fontSize: 18, color: Colors.orange),
-                    ),
-                    DropdownButton<String>(
-                      items: _paymentMethods.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedPaymentMethod = newValue!;
-                        });
-                      },
-                      dropdownColor: Colors.black,
-                      value: _selectedPaymentMethod,
-                      style: TextStyle(color: Colors.orange),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _makePayment,
-                      child: Text('Make Payment'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
+          : Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Account Details',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            ListTile(
+              title: Text(
+                '$_userName',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                '$_userEmail',
+                style: TextStyle(fontSize: 16),
+              ),
+              trailing: Icon(Icons.account_circle, size: 50, color: Colors.orange),
+            ),
+            Divider(),
+            SizedBox(height: 20),
+            Text(
+              'Balance',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '\$$_totalAmount',
+              style: TextStyle(fontSize: 32, color: Colors.green, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Payment Method',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              items: _paymentMethods.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedPaymentMethod = newValue!;
+                });
+              },
+              dropdownColor: Colors.black,
+              value: _selectedPaymentMethod,
+              style: TextStyle(color: Colors.orange),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _makePayment,
+              child: Text('Make Payment'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Colors.orange,
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                textStyle: TextStyle(fontSize: 20),
               ),
             ),
+          ],
+        ),
+      ),
     );
   }
 }

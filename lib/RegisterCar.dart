@@ -42,11 +42,20 @@ class _RegisterCarState extends State<RegisterCar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.orange,
+        title: Text('Register Car', style: TextStyle(color: Colors.black)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop(); // Pop the current screen
+          },
+        ),
+      ),
       body: Container(
         color: Colors.orange,
         child: Column(
           children: [
-            const SizedBox(height: 30,),
             SizedBox(
               height: 250,
               child: Padding(
@@ -141,7 +150,6 @@ class _RegisterCarState extends State<RegisterCar> {
                         border: OutlineInputBorder(),
                       ),
                     ),
-
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
@@ -194,7 +202,6 @@ class _RegisterCarState extends State<RegisterCar> {
                       ),
                     ),
                     const SizedBox(height: 10),
-
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
