@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logistics/OrderDriverDetails.dart';
+import 'package:logistics/RemoveAcceptedRequest.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,16 +36,16 @@ class Order {
   }
 }
 
-class OrderDriverAcceptedRequests extends StatefulWidget {
-  const OrderDriverAcceptedRequests({Key? key}) : super(key: key);
+class OrderDriverViewAcceptedRequests extends StatefulWidget {
+  const OrderDriverViewAcceptedRequests({Key? key}) : super(key: key);
 
   @override
-  _OrderDriverAcceptedRequestsState createState() => _OrderDriverAcceptedRequestsState();
+  _OrderDriverViewAcceptedRequestsState createState() => _OrderDriverViewAcceptedRequestsState();
 
 
 }
 
-class _OrderDriverAcceptedRequestsState extends State<OrderDriverAcceptedRequests> {
+class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAcceptedRequests> {
   late List<Order> _orders = [];
   bool _isLoading = false;
   String _errorMessage = '';
@@ -71,7 +71,7 @@ class _OrderDriverAcceptedRequestsState extends State<OrderDriverAcceptedRequest
           'accept': '*/*',
         };
 
-        final url = 'http://www.logistics-api.somee.com/api/Driver/ViewMyAcceptedRequests/1';
+        final url = 'http://www.logistics-api.somee.com//api/Driver/ViewMyAcceptedRequests/1';
 
         final response = await http.get(
           Uri.parse(url),
@@ -193,6 +193,7 @@ class OrderTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: () => _showOrderDetails(context, order),
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         elevation: 4,
@@ -243,5 +244,17 @@ class OrderTile extends StatelessWidget {
     );
   }
 
+  void _showOrderDetails(BuildContext context, Order order) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('requestId', order.requestId);
 
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RemoveAcceptedRequest(order: order)),
+    ).then((result) {
+      if (result == true) {
+        refreshOrders(); // Call the refreshOrders function when needed
+      }
+    });
+  }
 }

@@ -5,7 +5,7 @@ import 'package:logistics/OrderDriver.dart';
 import 'package:logistics/maps.dart';
 import 'package:logistics/test.dart';
 
-import 'OrderDriverAcceptedRequests.dart';
+import 'OrderDriverViewAcceptedRequests.dart';
 import 'activity.dart';
 import 'account.dart';
 
@@ -38,7 +38,7 @@ class _HomeState extends State<Home> {
     TestImage(),
     OrderDriver(),
     MapScreen(),
-    OrderDriverAcceptedRequests(),
+    OrderDriverViewAcceptedRequests(),
     Account(),
   ];
 
