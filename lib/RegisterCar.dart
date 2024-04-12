@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logistics/LoginScreen.dart';
 import 'package:logistics/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -295,6 +296,10 @@ class _RegisterCarState extends State<RegisterCar> {
 
         if (response.statusCode == 200) {
           displayToast("Car registered successfully!");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
           // You can add navigation or any other action here upon successful registration
         } else {
           displayToast("Car registration failed. Please try again.");

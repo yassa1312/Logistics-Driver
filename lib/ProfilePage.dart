@@ -101,27 +101,30 @@ class _ProfilePageState extends State<ProfilePage> {
         };
 
         var response = await http.get(
-          Uri.parse('http://www.logistics-api.somee.com/api/Account/MyProfile'),
+          Uri.parse('http://www.logistics-api.somee.com/api/Account/MyProfileDriver'),
           headers: headers,
         );
 
         if (response.statusCode == 200) {
           // Decode and handle the response
           Map<String, dynamic> responseData = jsonDecode(response.body);
-          // Do something with responseData
 
           setState(() {
-            // Example: Assign fetched data to controllers
+            // Assign fetched data to controllers
             _nameController.text = responseData['name'] ?? '';
             _emailController.text = responseData['email'] ?? '';
             _phoneNumberController.text = responseData['phoneNumber'] ?? '';
-            _imageUrlController.text = responseData['imageUrl'] ?? '';
-            _caR_VINController.text = responseData['carVIN'] ?? '';
-            _plateNumController.text = responseData['plateNum'] ?? '';
-            _rideTypeController.text = responseData['rideType'] ?? '';
-            _colorController.text = responseData['color'] ?? '';
-            _carModelController.text = responseData['carModel'] ?? '';
-            _capacityController.text = responseData['capacity']?.toString() ?? '';
+
+            // Access and assign car-related data if available
+            if (responseData.containsKey('car')) {
+              Map<String, dynamic> carData = responseData['car'];
+              _caR_VINController.text = carData['caR_VIN'] ?? '';
+              _plateNumController.text = carData['plate_Num'] ?? '';
+              _rideTypeController.text = carData['ride_Type'] ?? '';
+              _colorController.text = carData['color'] ?? '';
+              _carModelController.text = carData['car_Model'] ?? '';
+              _capacityController.text = carData['capacity']?.toString() ?? '';
+            }
           });
         } else {
           print('Failed to fetch profile data: ${response.reasonPhrase}');
@@ -133,6 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
       print("Error fetching data: $error");
     }
   }
+
 
   void _showProfileUpdateDialog(BuildContext context) {
     TextEditingController passwordController = TextEditingController();

@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:logistics/auth_service.dart';
-import 'package:logistics/the%20Order.dart';
+import 'package:logistics/main.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class OrderDetailsPage extends StatelessWidget {
+import 'OrderDriver.dart';
+
+class OrderDriverDetails extends StatelessWidget {
   final Order order;
 
-  const OrderDetailsPage({required this.order, Key? key}) : super(key: key);
+  const OrderDriverDetails({required this.order, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Order Details - ${order.id}',
+          'Order Details',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.orange,
@@ -31,11 +34,11 @@ class OrderDetailsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailItem('Product Name', order.productName),
-                    _buildDetailItem('Customer Name', order.customerName),
-                    _buildDetailItem('Delivery Location', order.deliveryLocation),
-                    _buildDetailItem('Status', order.status),
-                    _buildDetailItem('Special Instructions', order.specialInstructions),
+                    _buildOrderInfo('Request ID:', order.requestId),
+                    _buildOrderInfo('Pick Up Location:', order.pickUpLocation),
+                    _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
+                    _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
+                    _buildOrderInfo('Ride Type:', order.rideType),
                   ],
                 ),
               ),
@@ -108,7 +111,7 @@ class OrderDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailItem(String title, String value) {
+  Widget _buildOrderInfo(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -150,7 +153,7 @@ class OrderDetailsPage extends StatelessWidget {
         return AlertDialog(
           title: Text('Confirm Deletion', style: TextStyle(color: Colors.red)),
           content: Text(
-            'Are you sure you want to delete order ${order.id}?',
+            'Are you sure you want to delete order ${order.requestId}?',
             style: TextStyle(color: Colors.black),
           ),
           actions: <Widget>[
@@ -162,7 +165,6 @@ class OrderDetailsPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 _deleteOrder(context, order);
               },
               style: ButtonStyle(
@@ -177,9 +179,61 @@ class OrderDetailsPage extends StatelessWidget {
   }
 
   Future<void> _deleteOrder(BuildContext context, Order order) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? requestId = prefs.getString('requestId');
+    String? token = await AuthService.getAccessToken();
+
+    if (requestId == null) {
+      print('Request ID not found in shared preferences.');
+      return;
+    }
+
+    String url =
+        'http://www.logistics-api.somee.com/api/User/DeleteMyRequests/$requestId';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token',
+      'accept': '*/*',
+    };
+
+    var response = await http.delete(
+      Uri.parse(url),
+      headers: headers,
+    );
+
+    print('Response status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: 'Order deleted successfully', // Include a line break (\n)
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    } else {
+      // Handle other status codes
+      Fluttertoast.showToast(
+        msg: 'Failed to delete order. Status code: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  void _acceptOrder(BuildContext context, Order order) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? requestId = prefs.getString('request_Id');
+      String? requestId = prefs.getString('requestId');
       String? token = await AuthService.getAccessToken();
 
       if (requestId == null) {
@@ -187,21 +241,20 @@ class OrderDetailsPage extends StatelessWidget {
         return;
       }
 
-      String url = 'http://www.logistics-api.somee.com/api/User/DeleteMyRequests/$requestId';
+      String url = 'http://www.logistics-api.somee.com/api/Driver/AcceptRequest/$requestId';
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
         'accept': '*/*',
       };
 
-      var response = await http.delete(
+      var response = await http.put(
         Uri.parse(url),
         headers: headers,
       );
-
       if (response.statusCode == 200) {
         Fluttertoast.showToast(
-          msg: 'Order ${order.id} deleted successfully',
+          msg: 'Order ${order.requestId} Accepted',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,
@@ -210,38 +263,13 @@ class OrderDetailsPage extends StatelessWidget {
         // You might want to navigate back to the previous screen or perform other actions after deletion
       } else {
         Fluttertoast.showToast(
-          msg: 'Failed to delete order ${order.id}',
+          msg: 'Failed to accept order ${order.requestId}',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
           textColor: Colors.white,
         );
       }
-    } catch (error) {
-      print('Error deleting order: $error');
-      Fluttertoast.showToast(
-        msg: 'Error deleting order',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
-  }
-
-  void _acceptOrder(BuildContext context, Order order) async {
-    try {
-      // Implement logic to accept the order
-      // For example, you can make an API call to update the order status
-
-      // Display a toast indicating the order has been accepted
-      Fluttertoast.showToast(
-        msg: 'Order ${order.id} accepted',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
     } catch (error) {
       print('Error accepting order: $error');
       Fluttertoast.showToast(
@@ -256,17 +284,44 @@ class OrderDetailsPage extends StatelessWidget {
 
   void _refuseOrder(BuildContext context, Order order) async {
     try {
-      // Implement logic to refuse the order
-      // For example, you can make an API call to update the order status
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? requestId = prefs.getString('requestId');
+      String? token = await AuthService.getAccessToken();
 
-      // Display a toast indicating the order has been refused
-      Fluttertoast.showToast(
-        msg: 'Order ${order.id} refused',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.orange,
-        textColor: Colors.white,
+      if (requestId == null) {
+        print('Request ID not found in shared preferences.');
+        return;
+      }
+
+      String url = 'http://www.logistics-api.somee.com/api/Driver/RejectRequest/$requestId';
+
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+        'accept': '*/*',
+      };
+
+      var response = await http.put(
+        Uri.parse(url),
+        headers: headers,
       );
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: 'Order ${order.requestId} refused',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
+        // You might want to navigate back to the previous screen or perform other actions after deletion
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Failed to refuse order ${order.requestId}',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
     } catch (error) {
       print('Error refusing order: $error');
       Fluttertoast.showToast(
