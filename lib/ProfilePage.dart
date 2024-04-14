@@ -155,7 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               SizedBox(height: 10),
               TextFormField(
-                controller: passwordController,
+                controller: _passwordController,
                 obscureText: true, // Hide the entered text
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -167,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: <Widget>[
             ElevatedButton(
               onPressed: () {
-                String password = passwordController.text;
+                String password = _passwordController.text;
                 if (password.isEmpty) {
                   // Display toast indicating that password is required
                   displayToast('Password is required');

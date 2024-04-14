@@ -47,57 +47,46 @@ class OrderDriverDetails extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ElevatedButton(
-                  onPressed: () => _showDeleteConfirmationDialog(context, order),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
-                    elevation: MaterialStateProperty.all<double>(10),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    child: Text(
-                      'Delete Order',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  ),
-                ),
                 SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        _acceptOrder(context, order);
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        child: Text(
-                          'Accept',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _StartOrder(context, order);
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          child: Text(
+                            'Start',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        _refuseOrder(context, order);
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        child: Text(
-                          'Refuse',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _acceptOrder(context, order);
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          child: Text(
+                            'Accept',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
@@ -146,89 +135,7 @@ class OrderDriverDetails extends StatelessWidget {
     );
   }
 
-  Future<void> _showDeleteConfirmationDialog(BuildContext context, Order order) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Deletion', style: TextStyle(color: Colors.red)),
-          content: Text(
-            'Are you sure you want to delete order ${order.requestId}?',
-            style: TextStyle(color: Colors.black),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel', style: TextStyle(color: Colors.black)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _deleteOrder(context, order);
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-              ),
-              child: Text('Delete', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  Future<void> _deleteOrder(BuildContext context, Order order) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? requestId = prefs.getString('requestId');
-    String? token = await AuthService.getAccessToken();
-
-    if (requestId == null) {
-      print('Request ID not found in shared preferences.');
-      return;
-    }
-
-    String url =
-        'http://www.logistics-api.somee.com/api/User/DeleteMyRequests/$requestId';
-
-    Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
-      'accept': '*/*',
-    };
-
-    var response = await http.delete(
-      Uri.parse(url),
-      headers: headers,
-    );
-
-    print('Response status code: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      Fluttertoast.showToast(
-        msg: 'Order deleted successfully', // Include a line break (\n)
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
-    } else {
-      // Handle other status codes
-      Fluttertoast.showToast(
-        msg: 'Failed to delete order. Status code: ${response.statusCode}',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
-  }
 
   void _acceptOrder(BuildContext context, Order order) async {
     try {
@@ -260,8 +167,11 @@ class OrderDriverDetails extends StatelessWidget {
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
-        // You might want to navigate back to the previous screen or perform other actions after deletion
-      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+       } else {
         Fluttertoast.showToast(
           msg: 'Failed to accept order ${order.requestId}',
           toastLength: Toast.LENGTH_SHORT,
@@ -282,56 +192,7 @@ class OrderDriverDetails extends StatelessWidget {
     }
   }
 
-  void _refuseOrder(BuildContext context, Order order) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? requestId = prefs.getString('requestId');
-      String? token = await AuthService.getAccessToken();
 
-      if (requestId == null) {
-        print('Request ID not found in shared preferences.');
-        return;
-      }
-
-      String url = 'http://www.logistics-api.somee.com/api/Driver/RejectRequest/$requestId';
-
-      Map<String, String> headers = {
-        'Authorization': 'Bearer $token',
-        'accept': '*/*',
-      };
-
-      var response = await http.put(
-        Uri.parse(url),
-        headers: headers,
-      );
-      if (response.statusCode == 200) {
-        Fluttertoast.showToast(
-          msg: 'Order ${order.requestId} refused',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
-        // You might want to navigate back to the previous screen or perform other actions after deletion
-      } else {
-        Fluttertoast.showToast(
-          msg: 'Failed to refuse order ${order.requestId}',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
-      }
-    } catch (error) {
-      print('Error refusing order: $error');
-      Fluttertoast.showToast(
-        msg: 'Error refusing order',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
   }
 
   void _launchMap(String location) async {
@@ -341,5 +202,80 @@ class OrderDriverDetails extends StatelessWidget {
     } else {
       throw 'Could not launch $googleUrl';
     }
+  }
+
+Future<void> _StartOrder(BuildContext context, Order order) async {
+  try {
+    String? token = await AuthService.getAccessToken();
+
+    if (token == null) {
+      print('Access token not found.');
+      Fluttertoast.showToast(
+        msg: 'Access token not found.',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
+    String url = 'http://www.logistics-api.somee.com/api/Trip/Start/${order.requestId}';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token',
+      'accept': '*/*',
+    };
+
+    var response = await http.put(
+      Uri.parse(url),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: 'Order ${order.requestId} started successfully',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    } else if (response.statusCode == 401) {
+      // Unauthorized, token expired or invalid
+      print('Unauthorized: ${response.statusCode}');
+      print('Unauthorized: ${response.body}');
+      Fluttertoast.showToast(
+        msg: 'Unauthorized: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      // Handle token expiration or invalid token here, maybe redirect to login
+    } else {
+      // Other server errors
+      print('Failed to start order: ${response.statusCode}');
+      print('Failed to start order: ${response.body}');
+      Fluttertoast.showToast(
+        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
+  } catch (error) {
+    print('Error starting order: $error');
+    Fluttertoast.showToast(
+      msg: 'Error starting order: $error',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
   }
 }

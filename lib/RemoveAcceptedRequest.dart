@@ -53,24 +53,49 @@ class RemoveAcceptedRequest extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        _refuseOrder(context, order);
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        child: Text(
-                          'Refuse',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _StartOrder(context, order);
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          child: Text(
+                            'Start',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _refuseOrder(context, order);
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          child: Text(
+                            'Refuse',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
               ],
             ),
           ],
@@ -145,8 +170,11 @@ class RemoveAcceptedRequest extends StatelessWidget {
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
-        // You might want to navigate back to the previous screen or perform other actions after refusal
-      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      }  else {
         print('Failed to refuse order: ${response.statusCode}');
         Fluttertoast.showToast(
           msg: 'Failed to refuse order ${order.requestId}',
@@ -175,5 +203,79 @@ class RemoveAcceptedRequest extends StatelessWidget {
     } else {
       throw 'Could not launch $googleUrl';
     }
+  }
+}
+
+Future<void> _StartOrder(BuildContext context, Order order) async {
+  try {
+    String? token = await AuthService.getAccessToken();
+
+    if (token == null) {
+      print('Access token not found.');
+      Fluttertoast.showToast(
+        msg: 'Access token not found.',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
+    String url = 'http://www.logistics-api.somee.com/api/Trip/StartTrip/${order.requestId}';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token',
+      'accept': '*/*',
+    };
+
+    var response = await http.put(
+      Uri.parse(url),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: 'Order ${order.requestId} started successfully',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    } else if (response.statusCode == 401) {
+      // Unauthorized, token expired or invalid
+      print('Unauthorized: ${response.statusCode}');
+      Fluttertoast.showToast(
+        msg: 'Unauthorized: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      // Handle token expiration or invalid token here, maybe redirect to login
+    } else {
+      // Other server errors
+      print('Failed to start order: ${response.statusCode}');
+      Fluttertoast.showToast(
+        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
+  } catch (error) {
+    print('Error starting order: $error');
+    Fluttertoast.showToast(
+      msg: 'Error starting order: $error',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
   }
 }
