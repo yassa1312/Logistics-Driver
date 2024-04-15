@@ -35,7 +35,7 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    TestImage(),
+
     OrderDriver(),
     MapScreen(),
     OrderDriverViewAcceptedRequests(),
@@ -57,10 +57,7 @@ class _HomeState extends State<Home> {
             });
           },
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.camera),
-              label: 'Camera',
-            ),
+            
             BottomNavigationBarItem(
               icon: Icon(Icons.content_paste),
               label: 'Order',

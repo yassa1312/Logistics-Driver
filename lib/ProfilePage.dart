@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -26,14 +27,12 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _carModelController = TextEditingController();
   final TextEditingController _capacityController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
-
-    // Fetch data from the API
     fetchProfileData();
   }
+
 
   void editUserProfile() async {
     try {
@@ -137,6 +136,76 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<bool> _sendImage(BuildContext context) async {
+    final url = Uri.parse('http://www.logistics-api.somee.com/api/Admin/UploadFileApi');
+
+    // Check if access token and image URL are available
+    String? token = await AuthService.getAccessToken();
+    if (token == null || _imageUrlController.text.isEmpty) {
+      print('Access token or image URL is missing.');
+      displayToast('Access token or image URL is missing.');
+      return false;
+    }
+
+    // Create a File object from the image URL
+    File imageFile = File(_imageUrlController.text);
+
+    // Check if the image file exists
+    if (!imageFile.existsSync()) {
+      print('Image file does not exist.');
+      displayToast('Image file does not exist.');
+      return false;
+    }
+
+    // Read image file as bytes
+    List<int> bytes = await imageFile.readAsBytes();
+
+    // Extract filename from image path
+    String fileName = imageFile.path.split('/').last; // Extracts the last part of the path as the filename
+
+    try {
+      // Create a multipart request
+      var request = http.MultipartRequest(
+        'POST',
+        url,
+      );
+
+      // Set authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add image file to the request
+      var image = await http.MultipartFile.fromPath(
+        'File', // field name expected by the server
+        imageFile.path,
+      );
+      request.files.add(image);
+
+      // Add filename to the request
+      request.fields['FileName'] = fileName;
+
+      // Send the request
+      var response = await request.send();
+
+      // Print entire response
+      print('Response Status Code: ${response.statusCode}');
+
+      // Check response status
+      if (response.statusCode == 200) {
+        print('Image sent successfully!');
+        displayToast( 'Image sent successfully!');
+        return true;
+      } else {
+        print('Error sending image: ${response.statusCode}');
+        displayToast('Error sending image: ${response.statusCode}');
+        return false;
+      }
+    } catch (exception) {
+      print('Error sending image: $exception');
+      displayToast( 'Error sending image');
+      return false;
+    }
+  }
+
 
   void _showProfileUpdateDialog(BuildContext context) {
     TextEditingController passwordController = TextEditingController();
@@ -222,6 +291,21 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<List<int>> fetchImageBytes(String imageUrl) async {
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to load image');
+    }
+  }
+
+  Widget imageFromBytes(BuildContext context, List<int> bytes) {
+    return Image.memory(
+      Uint8List.fromList(bytes),
+      fit: BoxFit.cover,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,18 +320,20 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CircleAvatar(
-                radius: 100,
-                backgroundColor: Colors.orange,
-                child: ClipOval(
-                  child: _imageUrlController.text.isNotEmpty
-                      ? Image.file(
-                    File(_imageUrlController.text),
-                    fit: BoxFit.cover, // Now you can use fit!
-                  )
-                      : Icon(Icons.person, size: 100),
+              if (_imageUrlController.text.isNotEmpty)
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10), // Adjust border radius as needed
+                    color: Colors.orange,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10), // Match the container's border radius
+                    child: Image.file(
+                      File(_imageUrlController.text),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -263,6 +349,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     label: Text('Camera'),
                   ),
                 ],
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (_imageUrlController.text.isNotEmpty) {
+                    _sendImage(context).then((success) {
+                      if (success) {
+                        // Handle success
+                      } else {
+                        // Handle failure
+                      }
+                    }).catchError((error) {
+                      // Handle error
+                    });
+                  }
+                },
+                child: Text('Send Image'),
               ),
 
               SizedBox(height: 20),
