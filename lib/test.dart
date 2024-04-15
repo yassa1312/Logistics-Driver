@@ -153,17 +153,20 @@ class _TestImageState extends State<TestImage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (_imageUrlController.text.isNotEmpty)
-                CircleAvatar(
-                  radius: 100,
-                  backgroundColor: Colors.orange,
-                  child: ClipOval(
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10), // Adjust border radius as needed
+                    color: Colors.orange,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10), // Match the container's border radius
                     child: Image.file(
                       File(_imageUrlController.text),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-              Row(
+          Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
