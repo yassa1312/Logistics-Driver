@@ -53,7 +53,6 @@ class _TestImageState extends State<TestImage> {
       });
     }
   }
-
   Future<bool> _sendImage(BuildContext context) async {
     final url = Uri.parse('http://www.logistics-api.somee.com/api/Admin/UploadFileApi');
 
@@ -75,25 +74,37 @@ class _TestImageState extends State<TestImage> {
       return false;
     }
 
-    // Create a multipart request
-    var request = http.MultipartRequest(
-      'POST',
-      url,
-    );
+    // Read image file as bytes
+    List<int> bytes = await imageFile.readAsBytes();
 
-    // Set authorization header
-    request.headers['Authorization'] = 'Bearer $token';
-
-    // Add image file to the request
-    var image = await http.MultipartFile.fromPath(
-      'file', // field name expected by the server
-      imageFile.path,
-    );
-    request.files.add(image);
+    // Extract filename from image path
+    String fileName = imageFile.path.split('/').last; // Extracts the last part of the path as the filename
 
     try {
+      // Create a multipart request
+      var request = http.MultipartRequest(
+        'POST',
+        url,
+      );
+
+      // Set authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add image file to the request
+      var image = await http.MultipartFile.fromPath(
+        'File', // field name expected by the server
+        imageFile.path,
+      );
+      request.files.add(image);
+
+      // Add filename to the request
+      request.fields['FileName'] = fileName;
+
       // Send the request
       var response = await request.send();
+
+      // Print entire response
+      print('Response Status Code: ${response.statusCode}');
 
       // Check response status
       if (response.statusCode == 200) {
@@ -111,6 +122,7 @@ class _TestImageState extends State<TestImage> {
       return false;
     }
   }
+
 
   void _logout() async {
     await AuthService.clearUserData1();
