@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:logistics/main.dart';
@@ -53,14 +54,16 @@ class _TestImageState extends State<TestImage> {
       });
     }
   }
+
   Future<bool> _sendImage(BuildContext context) async {
-    final url = Uri.parse('http://www.logistics-api.somee.com/api/Admin/UploadFileApi');
+    final url = Uri.parse(
+        'http://www.logistics-api.somee.com/api/Admin/UploadFileApi');
 
     // Check if access token and image URL are available
     String? token = await AuthService.getAccessToken();
     if (token == null || _imageUrlController.text.isEmpty) {
       print('Access token or image URL is missing.');
-      displayToast(context, 'Access token or image URL is missing.');
+      displayToast( 'Access token or image URL is missing.');
       return false;
     }
 
@@ -70,7 +73,7 @@ class _TestImageState extends State<TestImage> {
     // Check if the image file exists
     if (!imageFile.existsSync()) {
       print('Image file does not exist.');
-      displayToast(context, 'Image file does not exist.');
+      displayToast('Image file does not exist.');
       return false;
     }
 
@@ -78,7 +81,9 @@ class _TestImageState extends State<TestImage> {
     List<int> bytes = await imageFile.readAsBytes();
 
     // Extract filename from image path
-    String fileName = imageFile.path.split('/').last; // Extracts the last part of the path as the filename
+    String fileName = imageFile.path
+        .split('/')
+        .last; // Extracts the last part of the path as the filename
 
     try {
       // Create a multipart request
@@ -109,16 +114,16 @@ class _TestImageState extends State<TestImage> {
       // Check response status
       if (response.statusCode == 200) {
         print('Image sent successfully!');
-        displayToast(context, 'Image sent successfully!');
+        displayToast('Image sent successfully!');
         return true;
       } else {
         print('Error sending image: ${response.statusCode}');
-        displayToast(context, 'Error sending image: ${response.statusCode}');
+        displayToast('Error sending image: ${response.statusCode}');
         return false;
       }
     } catch (exception) {
       print('Error sending image: $exception');
-      displayToast(context, 'Error sending image');
+      displayToast('Error sending image');
       return false;
     }
   }
@@ -138,7 +143,8 @@ class _TestImageState extends State<TestImage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: const Text('Image Upload', style: TextStyle(color: Colors.black)),
+        title: const Text(
+            'Image Upload', style: TextStyle(color: Colors.black)),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.logout),
@@ -155,18 +161,20 @@ class _TestImageState extends State<TestImage> {
               if (_imageUrlController.text.isNotEmpty)
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10), // Adjust border radius as needed
+                    borderRadius: BorderRadius.circular(10),
+                    // Adjust border radius as needed
                     color: Colors.orange,
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10), // Match the container's border radius
+                    borderRadius: BorderRadius.circular(10),
+                    // Match the container's border radius
                     child: Image.file(
                       File(_imageUrlController.text),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-          Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
@@ -205,13 +213,15 @@ class _TestImageState extends State<TestImage> {
     );
   }
 
-  void displayToast(BuildContext context, String message) {
-    final scaffold = ScaffoldMessenger.of(context);
-    scaffold.showSnackBar(
-      SnackBar(
-        content: Text(message),
-        action: SnackBarAction(label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
-      ),
+  void displayToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.orange,
+      textColor: Colors.white,
+      fontSize: 18.0,
     );
   }
 }
