@@ -17,4 +17,13 @@ class AuthService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(_accessTokenKey);
   }
+  static Future<void> clearUserData1() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userData');
+  }
+
+  static Future<void> clearUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+  }
 }
