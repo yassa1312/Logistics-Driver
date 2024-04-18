@@ -14,6 +14,7 @@ class Order {
   final String pickUpLocation;
   final String dropOffLocation;
   final String timeStampOnCreation;
+  final String startTripTime;
   final String rideType;
 
   Order({
@@ -21,6 +22,7 @@ class Order {
     required this.pickUpLocation,
     required this.dropOffLocation,
     required this.timeStampOnCreation,
+    required this.startTripTime,
     required this.rideType,
   });
 
@@ -31,6 +33,9 @@ class Order {
       dropOffLocation: json['drop_Off_Location'] ?? '',
       timeStampOnCreation: json['time_Stamp_On_Creation'] != null
           ? DateTime.parse(json['time_Stamp_On_Creation']).toString()
+          : '',
+      startTripTime: json['start_Trip_Time'] != null
+          ? DateTime.parse(json['start_Trip_Time']).toString()
           : '',
       rideType: json['ride_Type'] ?? '',
     );
@@ -118,6 +123,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         pickUpLocation: 'Location A',
         dropOffLocation: 'Location B',
         timeStampOnCreation: '2022-04-10 10:00:00',
+        startTripTime: '2022-04-10 10:00:00',
         rideType: 'Normal',
       ),
       Order(
@@ -125,6 +131,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         pickUpLocation: 'Location C',
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
+        startTripTime: '2022-04-10 10:00:00',
         rideType: 'Premium',
       ),
       // Add more dummy orders as needed
@@ -254,7 +261,7 @@ class OrderTile extends StatelessWidget {
   void _showOrderDetails(BuildContext context, Order order) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('requestId', order.requestId);
-
+    prefs.setString('startTripTime', order.startTripTime);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RemoveAcceptedRequest(order: order)),

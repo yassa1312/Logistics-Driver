@@ -140,8 +140,19 @@ class RemoveAcceptedRequest extends StatelessWidget {
   }
 
 
-
   void _refuseOrder(BuildContext context, Order order) async {
+    // Check if startTripTime is empty
+    if (order.startTripTime.isNotEmpty) {
+      Fluttertoast.showToast(
+        msg: 'Cannot refuse order with start trip time',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return; // Return early if startTripTime is not empty
+    }
+
     try {
       String? token = await AuthService.getAccessToken();
 
@@ -175,15 +186,18 @@ class RemoveAcceptedRequest extends StatelessWidget {
           MaterialPageRoute(builder: (context) => Home()),
         );
       }  else {
-        print('Failed to refuse order: ${response.statusCode}');
+        // Other server errors
+        print('Failed to start order: ${response.statusCode}');
         Fluttertoast.showToast(
-          msg: 'Failed to refuse order ${order.requestId}',
+          msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
           textColor: Colors.white,
+          fontSize: 16.0,
         );
       }
+
     } catch (error) {
       print('Error refusing order: $error');
       Fluttertoast.showToast(
@@ -257,7 +271,17 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
         textColor: Colors.white,
       );
       // Handle token expiration or invalid token here, maybe redirect to login
-    } else {
+    }  else if (order.startTripTime.isNotEmpty) {
+      // Show a toast message indicating that the trip has already started
+      Fluttertoast.showToast(
+        msg: 'Trip has already started for order ${order.requestId}.',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }else {
       // Other server errors
       print('Failed to start order: ${response.statusCode}');
       Fluttertoast.showToast(
