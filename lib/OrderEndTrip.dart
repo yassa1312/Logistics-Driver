@@ -57,38 +57,15 @@ class OrderEndTrip extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          _StartOrder(context, order);
+                          _endOrder(context, order);
                         },
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                           child: Text(
-                            'Start',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _refuseOrder(context, order);
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          child: Text(
-                            'Refuse',
+                            'End Order',
                             style: TextStyle(fontSize: 18, color: Colors.white),
                           ),
                         ),
@@ -141,11 +118,11 @@ class OrderEndTrip extends StatelessWidget {
   }
 
 
-  void _refuseOrder(BuildContext context, Order order) async {
+  void _endOrder(BuildContext context, Order order) async {
     // Check if startTripTime is empty
-    if (order.startTripTime.isNotEmpty) {
+    if (order.startTripTime.isEmpty) {
       Fluttertoast.showToast(
-        msg: 'Cannot refuse order with start trip time',
+        msg: 'Cannot End order without start trip',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
@@ -162,7 +139,7 @@ class OrderEndTrip extends StatelessWidget {
         return;
       }
 
-      String url = 'http://www.logistics-api.somee.com/api/Driver/RemoveAcceptedRequest/${order.requestId}';
+      String url = 'http://www.logistics-api.somee.com/api/Driver/EndTrip/${order.requestId}';
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
@@ -176,7 +153,7 @@ class OrderEndTrip extends StatelessWidget {
 
       if (response.statusCode == 200) {
         Fluttertoast.showToast(
-          msg: 'Order ${order.requestId} refused',
+          msg: 'Order ${order.requestId} is Ended',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,
@@ -221,86 +198,3 @@ class OrderEndTrip extends StatelessWidget {
   }
 }
 
-Future<void> _StartOrder(BuildContext context, Order order) async {
-  try {
-    String? token = await AuthService.getAccessToken();
-
-    if (token == null) {
-      print('Access token not found.');
-      Fluttertoast.showToast(
-        msg: 'Access token not found.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-      return;
-    }
-
-    String url = 'http://www.logistics-api.somee.com/api/Trip/StartTrip/${order.requestId}';
-
-    Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
-      'accept': '*/*',
-    };
-
-    var response = await http.put(
-      Uri.parse(url),
-      headers: headers,
-    );
-
-    if (response.statusCode == 200) {
-      Fluttertoast.showToast(
-        msg: 'Order ${order.requestId} started successfully',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
-    } else if (response.statusCode == 401) {
-      // Unauthorized, token expired or invalid
-      print('Unauthorized: ${response.statusCode}');
-      Fluttertoast.showToast(
-        msg: 'Unauthorized: ${response.statusCode}',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-      // Handle token expiration or invalid token here, maybe redirect to login
-    }  else if (order.startTripTime.isNotEmpty) {
-      // Show a toast message indicating that the trip has already started
-      Fluttertoast.showToast(
-        msg: 'Trip has already started for order ${order.requestId}.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }else {
-      // Other server errors
-      print('Failed to start order: ${response.statusCode}');
-      Fluttertoast.showToast(
-        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
-  } catch (error) {
-    print('Error starting order: $error');
-    Fluttertoast.showToast(
-      msg: 'Error starting order: $error',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
-  }
-}

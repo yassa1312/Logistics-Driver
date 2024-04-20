@@ -7,12 +7,12 @@ import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'OrderDriver.dart';
+import 'OrderViewRequests.dart';
 
-class OrderDriverDetails extends StatelessWidget {
+class OrderAcceptRequest extends StatelessWidget {
   final Order order;
 
-  const OrderDriverDetails({required this.order, Key? key}) : super(key: key);
+  const OrderAcceptRequest({required this.order, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logistics/LoginScreen.dart';
-import 'package:logistics/OrderDriverDetails.dart';
+import 'package:logistics/OrderAcceptRequest.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,16 +38,16 @@ class Order {
   }
 }
 
-class OrderDriver extends StatefulWidget {
-  const OrderDriver({Key? key}) : super(key: key);
+class OrderViewRequests extends StatefulWidget {
+  const OrderViewRequests({Key? key}) : super(key: key);
 
   @override
-  _OrderDriverState createState() => _OrderDriverState();
+  _OrderViewRequestsState createState() => _OrderViewRequestsState();
 
 
 }
 
-class _OrderDriverState extends State<OrderDriver> {
+class _OrderViewRequestsState extends State<OrderViewRequests> {
   late List<Order> _orders = [];
   bool _isLoading = false;
   String _errorMessage = '';
@@ -271,7 +271,7 @@ class OrderTile extends StatelessWidget {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => OrderDriverDetails(order: order)),
+      MaterialPageRoute(builder: (context) => OrderAcceptRequest(order: order)),
     ).then((result) {
       if (result == true) {
         refreshOrders(); // Call the refreshOrders function when needed

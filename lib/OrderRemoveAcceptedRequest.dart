@@ -236,7 +236,7 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
       return;
     }
 
-    String url = 'http://www.logistics-api.somee.com/api/Trip/StartTrip/${order.requestId}';
+    String url = 'http://www.logistics-api.somee.com/api/Driver/StartTrip/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
