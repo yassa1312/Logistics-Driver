@@ -6,7 +6,7 @@ import 'package:logistics/OrderViewRequests.dart';
 import 'package:logistics/maps.dart';
 import 'package:logistics/test.dart';
 
-import 'OrderDriverViewAcceptedRequests.dart';
+import 'OrderViewAcceptedRequests.dart';
 import 'activity.dart';
 import 'account.dart';
 

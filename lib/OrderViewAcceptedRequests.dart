@@ -11,6 +11,8 @@ import 'auth_service.dart'; // Make sure this import is correct
 
 class Order {
   final String requestId;
+  final String userName; // Add userName property
+  final String userPhone; // Add userPhone property
   final String pickUpLocation;
   final String dropOffLocation;
   final String timeStampOnCreation;
@@ -19,6 +21,8 @@ class Order {
 
   Order({
     required this.requestId,
+    required this.userName,
+    required this.userPhone,
     required this.pickUpLocation,
     required this.dropOffLocation,
     required this.timeStampOnCreation,
@@ -29,6 +33,8 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       requestId: json['request_Id'] ?? '',
+      userName: json['userName'] ?? '', // Parse userName from JSON
+      userPhone: json['userPhone'] ?? '', // Parse userPhone from JSON
       pickUpLocation: json['pick_Up_Location'] ?? '',
       dropOffLocation: json['drop_Off_Location'] ?? '',
       timeStampOnCreation: json['time_Stamp_On_Creation'] != null
@@ -41,6 +47,8 @@ class Order {
     );
   }
 }
+
+
 
 class OrderDriverViewAcceptedRequests extends StatefulWidget {
   const OrderDriverViewAcceptedRequests({Key? key}) : super(key: key);
@@ -120,6 +128,8 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
     List<Order> dummyOrders = [
       Order(
         requestId: '1',
+        userName:"yassa",
+        userPhone:"1234",
         pickUpLocation: 'Location A',
         dropOffLocation: 'Location B',
         timeStampOnCreation: '2022-04-10 10:00:00',
@@ -128,6 +138,8 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
       ),
       Order(
         requestId: '2',
+        userName:"yassa",
+        userPhone:"1234",
         pickUpLocation: 'Location C',
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
@@ -214,6 +226,8 @@ class OrderTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrderInfo('Request ID:', order.requestId),
+              _buildOrderInfo('User Name:', order.userName), // Display user name
+              _buildOrderInfo('User Phone:', order.userPhone), // Display user phone
               MapLocationWidget(
                 locationLabel: 'Pick Up Location:',
                 location: order.pickUpLocation,
@@ -304,7 +318,7 @@ class MapLocationWidget extends StatelessWidget {
             '$location',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.black,
+              color: Colors.blue,
             ),
           ),
         ],

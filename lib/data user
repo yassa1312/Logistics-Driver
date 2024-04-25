@@ -1,0 +1,12 @@
+[{"request_Id":"8be6b568-4e48-4307-af38-b428a38a30ad",
+"userName":"yassa",
+"userPhone":"1234",
+"pick_Up_Location":"October",
+"drop_Off_Location":"Maadi","
+time_Stamp_On_Creation":"2024-04-26T00:10:52.0129251+00:00",
+"time_Stamp_On_Acceptance":"2024-04-26T00:11:50.8433264+00:00",
+"start_Trip_Time":null,"end_Trip_Time":null,"ride_Type":
+"Refrigerated Truck","delivery_Kind":"Normal Truck",
+"load_Weight":"Average (4 ton)",
+"comment":null,"rating":null,"duration":null,
+"finished":false,"load_Image":null}]
