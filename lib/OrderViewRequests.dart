@@ -73,7 +73,7 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
           'accept': '*/*',
         };
 
-        final url = 'http://www.logistics-api.somee.com/api/Driver/ViewRequests/1';
+        final url = 'http://logistics-api-8.somee.com/api/Driver/ViewRequests/1';
 
         final response = await http.get(
           Uri.parse(url),

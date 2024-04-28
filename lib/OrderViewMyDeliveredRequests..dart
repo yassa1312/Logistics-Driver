@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logistics/OrderEndTrip.dart';
 import 'package:logistics/OrderRemoveAcceptedRequest.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,7 +77,7 @@ class _OrderViewMyDeliveredRequestsState extends State<OrderViewMyDeliveredReque
           'accept': '*/*',
         };
 
-        final url = 'http://www.logistics-api.somee.com//api/Driver/ViewMyAcceptedRequests/1';
+        final url = 'http://logistics-api-8.somee.com/api/Driver/ViewMyDeliveredRequests/1';
 
         final response = await http.get(
           Uri.parse(url),
@@ -150,7 +149,7 @@ class _OrderViewMyDeliveredRequestsState extends State<OrderViewMyDeliveredReque
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Working Orders',
+          'Worked Orders',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.orange,
@@ -202,7 +201,6 @@ class OrderTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _showOrderDetails(context, order),
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         elevation: 4,
@@ -215,14 +213,8 @@ class OrderTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrderInfo('Request ID:', order.requestId),
-              MapLocationWidget(
-                locationLabel: 'Pick Up Location:',
-                location: order.pickUpLocation,
-              ),
-              MapLocationWidget(
-                locationLabel: 'Drop Off Location:',
-                location: order.dropOffLocation,
-              ),
+              _buildOrderInfo('Pick Up Location:', order.pickUpLocation),
+              _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
               _buildOrderInfo('Ride Type:', order.rideType),
             ],
@@ -258,67 +250,5 @@ class OrderTile extends StatelessWidget {
       ),
     );
   }
-
-  void _showOrderDetails(BuildContext context, Order order) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('requestId', order.requestId);
-    prefs.setString('startTripTime', order.startTripTime);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => OrderEndTrip(order: order)),
-    ).then((result) {
-      if (result == true) {
-        refreshOrders(); // Call the refreshOrders function when needed
-      }
-    });
-  }
 }
-class MapLocationWidget extends StatelessWidget {
-  final String locationLabel;
-  final String location;
 
-  const MapLocationWidget({
-    Key? key,
-    required this.locationLabel,
-    required this.location,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        _launchMapUrl(location);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$locationLabel',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.blue,
-            ),
-          ),
-          SizedBox(height: 4), // Add a SizedBox for spacing
-          Text(
-            '$location',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _launchMapUrl(String location) async {
-    String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$location';
-    if (await canLaunch(googleMapsUrl)) {
-      await launch(googleMapsUrl);
-    } else {
-      throw 'Could not launch $googleMapsUrl';
-    }
-  }
-}

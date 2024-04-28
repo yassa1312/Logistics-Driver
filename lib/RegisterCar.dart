@@ -285,7 +285,7 @@ class _RegisterCarState extends State<RegisterCar> {
 
         // Send registration request
         var response = await http.post(
-          Uri.parse('http://www.logistics-api.somee.com/api/Account/RegisterCar'),
+          Uri.parse('http://logistics-api-8.somee.com/api/Account/RegisterCar'),
           headers: headers,
           body: json.encode(data),
         );

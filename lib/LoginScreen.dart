@@ -312,7 +312,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   Future<void> loginUserAPI(BuildContext context, String email,
       String password) async {
-    const String apiUrl = 'http://www.logistics-api.somee.com/login'; // Replace with your actual API endpoint
+    const String apiUrl = 'http://logistics-api-8.somee.com/login'; // Replace with your actual API endpoint
 
     final Map<String, String> headers = {
       'Content-Type': 'application/json',

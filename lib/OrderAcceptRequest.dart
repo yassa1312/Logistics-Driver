@@ -126,7 +126,7 @@ class OrderAcceptRequest extends StatelessWidget {
         return;
       }
 
-      String url = 'http://www.logistics-api.somee.com/api/Driver/AcceptRequest/$requestId';
+      String url = 'http://logistics-api-8.somee.com/api/Driver/AcceptRequest/$requestId';
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
@@ -198,7 +198,7 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
       return;
     }
 
-    String url = 'http://www.logistics-api.somee.com/api/Trip/Start/${order.requestId}';
+    String url = 'http://logistics-api-8.somee.com/api/Trip/Start/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',

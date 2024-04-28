@@ -100,7 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
         };
 
         var response = await http.get(
-          Uri.parse('http://www.logistics-api.somee.com/api/Account/MyProfileDriver'),
+          Uri.parse('http://logistics-api-8.somee.com/api/Account/MyProfileDriver'),
           headers: headers,
         );
 
@@ -137,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<bool> _sendImage(BuildContext context) async {
-    final url = Uri.parse('http://www.logistics-api.somee.com/api/Admin/UploadFileApi');
+    final url = Uri.parse('http://logistics-api-8.somee.com/api/Admin/UploadFileApi');
 
     // Check if access token and image URL are available
     String? token = await AuthService.getAccessToken();
@@ -491,16 +491,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _showProfileUpdateDialog(context);
-                },
-
-                child: Text('Edit'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                ),
-              ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(

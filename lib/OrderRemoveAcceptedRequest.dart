@@ -95,6 +95,29 @@ class RemoveAcceptedRequest extends StatelessWidget {
                     ),
                   ],
                 ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                         _endOrder(context, order);
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          child: Text(
+                            'End Trip',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
               ],
             ),
@@ -140,75 +163,7 @@ class RemoveAcceptedRequest extends StatelessWidget {
   }
 
 
-  void _refuseOrder(BuildContext context, Order order) async {
-    // Check if startTripTime is empty
-    if (order.startTripTime.isNotEmpty) {
-      Fluttertoast.showToast(
-        msg: 'Cannot refuse order with start trip time',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-      return; // Return early if startTripTime is not empty
-    }
 
-    try {
-      String? token = await AuthService.getAccessToken();
-
-      if (token == null) {
-        print('Access token not found.');
-        return;
-      }
-
-      String url = 'http://www.logistics-api.somee.com/api/Driver/RemoveAcceptedRequest/${order.requestId}';
-
-      Map<String, String> headers = {
-        'Authorization': 'Bearer $token',
-        'accept': '*/*',
-      };
-
-      var response = await http.put(
-        Uri.parse(url),
-        headers: headers,
-      );
-
-      if (response.statusCode == 200) {
-        Fluttertoast.showToast(
-          msg: 'Order ${order.requestId} refused',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Home()),
-        );
-      }  else {
-        // Other server errors
-        print('Failed to start order: ${response.statusCode}');
-        Fluttertoast.showToast(
-          msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      }
-
-    } catch (error) {
-      print('Error refusing order: $error');
-      Fluttertoast.showToast(
-        msg: 'Error refusing order',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
-  }
 
   void _launchMap(String location) async {
     String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$location';
@@ -236,7 +191,7 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
       return;
     }
 
-    String url = 'http://www.logistics-api.somee.com/api/Driver/StartTrip/${order.requestId}';
+    String url = 'http://logistics-api-8.somee.com/api/Driver/StartTrip/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
@@ -296,6 +251,144 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
     print('Error starting order: $error');
     Fluttertoast.showToast(
       msg: 'Error starting order: $error',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+  }
+}
+void _refuseOrder(BuildContext context, Order order) async {
+  // Check if startTripTime is empty
+  if (order.startTripTime.isNotEmpty) {
+    Fluttertoast.showToast(
+      msg: 'Cannot refuse order with start trip time',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+    return; // Return early if startTripTime is not empty
+  }
+
+  try {
+    String? token = await AuthService.getAccessToken();
+
+    if (token == null) {
+      print('Access token not found.');
+      return;
+    }
+
+    String url = 'http://logistics-api-8.somee.com/api/Driver/RemoveAcceptedRequest/${order.requestId}';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token',
+      'accept': '*/*',
+    };
+
+    var response = await http.put(
+      Uri.parse(url),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: 'Order ${order.requestId} refused',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }  else {
+      // Other server errors
+      print('Failed to start order: ${response.statusCode}');
+      Fluttertoast.showToast(
+        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+
+  } catch (error) {
+    print('Error refusing order: $error');
+    Fluttertoast.showToast(
+      msg: 'Error refusing order',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+  }
+}
+Future<void> _endOrder(BuildContext context, Order order) async {
+  // Check if startTripTime is empty
+  if (order.startTripTime.isEmpty) {
+    Fluttertoast.showToast(
+      msg: 'Cannot End order without start trip',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+    return; // Return early if startTripTime is not empty
+  }
+
+  try {
+    String? token = await AuthService.getAccessToken();
+
+    if (token == null) {
+      print('Access token not found.');
+      return;
+    }
+
+    String url = 'http://logistics-api-8.somee.com/api/Driver/EndTrip/${order.requestId}';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token',
+      'accept': '*/*',
+    };
+
+    var response = await http.put(
+      Uri.parse(url),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: 'Order ${order.requestId} is Ended',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }  else {
+      // Other server errors
+      print('Failed to start order: ${response.statusCode}');
+      Fluttertoast.showToast(
+        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+
+  } catch (error) {
+    print('Error refusing order: $error');
+    Fluttertoast.showToast(
+      msg: 'Error refusing order',
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Colors.red,

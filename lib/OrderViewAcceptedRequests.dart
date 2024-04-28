@@ -5,6 +5,7 @@ import 'package:logistics/OrderRemoveAcceptedRequest.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
 import 'auth_service.dart'; // Make sure this import is correct
@@ -33,8 +34,8 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       requestId: json['request_Id'] ?? '',
-      userName: json['userName'] ?? '', // Parse userName from JSON
-      userPhone: json['userPhone'] ?? '', // Parse userPhone from JSON
+      userName: json['userName'] ?? '',
+      userPhone: json['userPhone'] ?? '',
       pickUpLocation: json['pick_Up_Location'] ?? '',
       dropOffLocation: json['drop_Off_Location'] ?? '',
       timeStampOnCreation: json['time_Stamp_On_Creation'] != null
@@ -67,8 +68,20 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
   @override
   void initState() {
     super.initState();
+    _requestPhonePermission();
     fetchOrders(); // Initially fetch orders
   }
+  Future<void> _requestPhonePermission() async {
+    var status = await Permission.phone.request();
+    if (status.isGranted) {
+      // Permission is granted
+      print("Phone permission is granted");
+    } else {
+      // Permission is not granted
+      print("Phone permission is not granted");
+    }
+  }
+
 
   Future<void> fetchOrders() async {
     setState(() {
@@ -85,7 +98,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
           'accept': '*/*',
         };
 
-        final url = 'http://www.logistics-api.somee.com//api/Driver/ViewMyAcceptedRequests/1';
+        final url = 'http://logistics-api-8.somee.com/api/Driver/ViewMyAcceptedRequests/1';
 
         final response = await http.get(
           Uri.parse(url),
@@ -202,11 +215,11 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
 
 class OrderTile extends StatelessWidget {
   final Order order;
-  final Function refreshOrders; // Define this callback function
+  final Function refreshOrders;
 
   const OrderTile({
     required this.order,
-    required this.refreshOrders, // Pass this callback through constructor
+    required this.refreshOrders,
     Key? key,
   }) : super(key: key);
 
@@ -226,8 +239,8 @@ class OrderTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrderInfo('Request ID:', order.requestId),
-              _buildOrderInfo('User Name:', order.userName), // Display user name
-              _buildOrderInfo('User Phone:', order.userPhone), // Display user phone
+              _buildOrderInfo('User Name:', order.userName),
+              _buildUserPhoneInfo(context, 'User Phone:', order.userPhone),
               MapLocationWidget(
                 locationLabel: 'Pick Up Location:',
                 location: order.pickUpLocation,
@@ -259,7 +272,7 @@ class OrderTile extends StatelessWidget {
               color: Colors.blue,
             ),
           ),
-          SizedBox(height: 4), // Add a SizedBox for spacing
+          SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(
@@ -272,6 +285,37 @@ class OrderTile extends StatelessWidget {
     );
   }
 
+  Widget _buildUserPhoneInfo(BuildContext context, String title, String phoneNumber) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.blue,
+            ),
+          ),
+          SizedBox(height: 4),
+          GestureDetector(
+            onTap: () => _launchPhoneCall(context, phoneNumber),
+            child: Text(
+              phoneNumber,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.green,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   void _showOrderDetails(BuildContext context, Order order) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('requestId', order.requestId);
@@ -281,11 +325,23 @@ class OrderTile extends StatelessWidget {
       MaterialPageRoute(builder: (context) => RemoveAcceptedRequest(order: order)),
     ).then((result) {
       if (result == true) {
-        refreshOrders(); // Call the refreshOrders function when needed
+        refreshOrders();
       }
     });
   }
+
+  void _launchPhoneCall(BuildContext context, String phoneNumber) async {
+    String url = 'tel:$phoneNumber';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch phone call')),
+      );
+    }
+  }
 }
+
 class MapLocationWidget extends StatelessWidget {
   final String locationLabel;
   final String location;

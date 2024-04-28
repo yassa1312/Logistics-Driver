@@ -332,7 +332,7 @@ class RegistrationAPI {
 
     try {
       var response = await http.post(
-        Uri.parse('http://www.logistics-api.somee.com/api/Account/Register'),
+        Uri.parse('http://logistics-api-8.somee.com/api/Account/Register'),
         headers: headers,
         body: json.encode(data),
       );
