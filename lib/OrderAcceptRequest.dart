@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'GiveReason.dart';
 import 'OrderViewRequests.dart';
 
 class OrderAcceptRequest extends StatelessWidget {
@@ -125,8 +126,8 @@ class OrderAcceptRequest extends StatelessWidget {
         print('Request ID not found in shared preferences.');
         return;
       }
-
-      String url = 'http://logistics-api-8.somee.com/api/Driver/AcceptRequest/$requestId';
+      String? baseUrl = await AuthService.getURL();
+      String url = '$baseUrl/api/Driver/AcceptRequest/$requestId';
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
@@ -197,8 +198,8 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
       );
       return;
     }
-
-    String url = 'http://logistics-api-8.somee.com/api/Trip/Start/${order.requestId}';
+    String? baseUrl = await AuthService.getURL();
+    String url = '$baseUrl/api/Trip/Start/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',

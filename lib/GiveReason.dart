@@ -99,9 +99,9 @@ class _GiveReasonState extends State<GiveReason> {
   Future<void> endTrip(String requestId, String comment) async {
     try {
       String? token = await AuthService.getAccessToken();
-
+      String? baseUrl = await AuthService.getURL();
       if (token != null) {
-        String url = 'http://logistics-api-8.somee.com/api/Driver/CancelRequest';
+        String url = '$baseUrl/api/Driver/CancelRequest';
 
         // Define request body
         Map<String, dynamic> requestBody = {

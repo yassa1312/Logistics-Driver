@@ -76,8 +76,8 @@ class _OrderViewMyDeliveredRequestsState extends State<OrderViewMyDeliveredReque
           'Authorization': 'Bearer $token',
           'accept': '*/*',
         };
-
-        final url = 'http://logistics-api-8.somee.com/api/Driver/ViewMyDeliveredRequests/1';
+        String? baseUrl = await AuthService.getURL();
+        final url = '$baseUrl/api/Driver/ViewMyDeliveredRequests/1';
 
         final response = await http.get(
           Uri.parse(url),

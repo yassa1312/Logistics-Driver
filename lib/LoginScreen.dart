@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logistics/RegisterScreen.dart';
 import 'package:logistics/ResetPassword.dart';
+import 'package:logistics/auth_service.dart';
 import 'package:logistics/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -312,7 +313,8 @@ class LoginScreenState extends State<LoginScreen> {
 
   Future<void> loginUserAPI(BuildContext context, String email,
       String password) async {
-    const String apiUrl = 'http://logistics-api-8.somee.com/login'; // Replace with your actual API endpoint
+    String? baseUrl = await AuthService.getURL();
+    final apiUrl = '$baseUrl/login'; // Replace with your actual API endpoint
 
     final Map<String, String> headers = {
       'Content-Type': 'application/json',

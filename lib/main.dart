@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:logistics/LoginScreen.dart';
 import 'package:logistics/OrderViewMyDeliveredRequests..dart';
 import 'package:logistics/OrderViewRequests.dart';
+import 'package:logistics/OrderViewMyCanceledRequests.dart';
 import 'package:logistics/maps.dart';
 import 'package:logistics/test.dart';
 
@@ -40,6 +41,7 @@ class _HomeState extends State<Home> {
     OrderViewRequests(),
     OrderDriverViewAcceptedRequests(),
     OrderViewMyDeliveredRequests(),
+    ViewMyCanceledRequests(),
     Account(),
   ];
 
@@ -69,7 +71,11 @@ class _HomeState extends State<Home> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.history),
-              label: 'Working Orders',
+              label: 'Worked Orders',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.safety_divider),
+              label: 'Canceled Orders',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

@@ -190,8 +190,9 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
       );
       return;
     }
+    String? baseUrl = await AuthService.getURL();
 
-    String url = 'http://logistics-api-8.somee.com/api/Driver/StartTrip/${order.requestId}';
+    String url = '$baseUrl/api/Driver/StartTrip/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
@@ -278,8 +279,8 @@ void _refuseOrder(BuildContext context, Order order) async {
       print('Access token not found.');
       return;
     }
-
-    String url = 'http://logistics-api-8.somee.com/api/Driver/RemoveAcceptedRequest/${order.requestId}';
+    String? baseUrl = await AuthService.getURL();
+    String url = '$baseUrl/api/Driver/RemoveAcceptedRequest/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
@@ -347,8 +348,8 @@ Future<void> _endOrder(BuildContext context, Order order) async {
       print('Access token not found.');
       return;
     }
-
-    String url = 'http://logistics-api-8.somee.com/api/Driver/EndTrip/${order.requestId}';
+    String? baseUrl = await AuthService.getURL();
+    String url = '$baseUrl/api/Driver/EndTrip/${order.requestId}';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',

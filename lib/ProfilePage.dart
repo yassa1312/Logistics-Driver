@@ -44,11 +44,11 @@ class _ProfilePageState extends State<ProfilePage> {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json', // Specify content type
         };
-
+        String? baseUrl = await AuthService.getURL();
         var request = http.Request(
             'PUT',
             Uri.parse(
-                'http://www.logistics-api.somee.com/api/Account/EditMyProfile'));
+                '$baseUrl/api/Account/EditMyProfile'));
 
         // Prepare request body
         request.headers.addAll(headers);
@@ -98,9 +98,9 @@ class _ProfilePageState extends State<ProfilePage> {
         var headers = {
           'Authorization': 'Bearer $token',
         };
-
+        String? baseUrl = await AuthService.getURL();
         var response = await http.get(
-          Uri.parse('http://logistics-api-8.somee.com/api/Account/MyProfileDriver'),
+          Uri.parse('$baseUrl/api/Account/MyProfileDriver'),
           headers: headers,
         );
 
@@ -137,7 +137,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<bool> _sendImage(BuildContext context) async {
-    final url = Uri.parse('http://logistics-api-8.somee.com/api/Admin/UploadFileApi');
+    String? baseUrl = await AuthService.getURL();
+    final url = Uri.parse('$baseUrl/api/Admin/UploadFileApi');
 
     // Check if access token and image URL are available
     String? token = await AuthService.getAccessToken();

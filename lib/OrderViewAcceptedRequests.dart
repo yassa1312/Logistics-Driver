@@ -17,6 +17,8 @@ class Order {
   final String pickUpLocation;
   final String dropOffLocation;
   final String timeStampOnCreation;
+  final String endTripTime;
+  final String timeStampOnAcceptance;
   final String startTripTime;
   final String rideType;
 
@@ -27,6 +29,8 @@ class Order {
     required this.pickUpLocation,
     required this.dropOffLocation,
     required this.timeStampOnCreation,
+    required this.endTripTime,
+    required this.timeStampOnAcceptance,
     required this.startTripTime,
     required this.rideType,
   });
@@ -45,6 +49,13 @@ class Order {
           ? DateTime.parse(json['start_Trip_Time']).toString()
           : '',
       rideType: json['ride_Type'] ?? '',
+      endTripTime: json['end_Trip_Time'] != null
+          ? DateTime.parse(json['end_Trip_Time']).toString()
+          : '',
+      timeStampOnAcceptance: json['time_Stamp_On_Acceptance'] != null
+          ? DateTime.parse(json['time_Stamp_On_Acceptance']).toString()
+          : '',
+
     );
   }
 }
@@ -97,8 +108,9 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
           'Authorization': 'Bearer $token',
           'accept': '*/*',
         };
+        String? baseUrl = await AuthService.getURL(); // Retrieve base URL from AuthService
 
-        final url = 'http://logistics-api-8.somee.com/api/Driver/ViewMyAcceptedRequests/1';
+        final url = '$baseUrl/api/Driver/ViewMyAcceptedRequests/1';
 
         final response = await http.get(
           Uri.parse(url),
@@ -143,11 +155,14 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         requestId: '1',
         userName:"yassa",
         userPhone:"1234",
+        endTripTime: '2022-04-10 10:00:00',
+        timeStampOnAcceptance: '2022-04-10 10:00:00',
         pickUpLocation: 'Location A',
         dropOffLocation: 'Location B',
         timeStampOnCreation: '2022-04-10 10:00:00',
         startTripTime: '2022-04-10 10:00:00',
         rideType: 'Normal',
+
       ),
       Order(
         requestId: '2',
@@ -155,8 +170,10 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         userPhone:"1234",
         pickUpLocation: 'Location C',
         dropOffLocation: 'Location D',
+        endTripTime: '',
+        timeStampOnAcceptance: '2022-04-10 10:00:00',
         timeStampOnCreation: '2022-04-11 12:00:00',
-        startTripTime: '2022-04-10 10:00:00',
+        startTripTime: '',
         rideType: 'Premium',
       ),
       // Add more dummy orders as needed
@@ -174,7 +191,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'MY Orders',
+          'My Orders',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.orange,
@@ -240,7 +257,7 @@ class OrderTile extends StatelessWidget {
             children: [
               _buildOrderInfo('Request ID:', order.requestId),
               _buildOrderInfo('User Name:', order.userName),
-              _buildUserPhoneInfo(context, 'User Phone:', order.userPhone),
+              _buildOrderInfo('User Phone:', order.userPhone),//TODO in phone
               MapLocationWidget(
                 locationLabel: 'Pick Up Location:',
                 location: order.pickUpLocation,
@@ -251,6 +268,7 @@ class OrderTile extends StatelessWidget {
               ),
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
               _buildOrderInfo('Ride Type:', order.rideType),
+              _buildStatusInfo2(order),
             ],
           ),
         ),
@@ -314,7 +332,50 @@ class OrderTile extends StatelessWidget {
       ),
     );
   }
+  Widget _buildStatusInfo2(Order order) {
+    String status = '';
 
+   if (order.timeStampOnCreation.isNotEmpty &&
+        order.startTripTime.isNotEmpty) {
+      status = 'It Started';
+    } else if (order.timeStampOnAcceptance.isNotEmpty) {
+      status = 'Had Accepted';
+    }
+
+    Color statusColor = _getStatusColor(status);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Status:',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Colors.blue,
+          ),
+        ),
+        SizedBox(height: 4), // Add a SizedBox for spacing
+        Text(
+          status,
+          style: TextStyle(
+            fontSize: 16,
+            color: statusColor, // Change the color here
+          ),
+        ),
+      ],
+    );
+  }
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'It Started':
+        return Colors.deepOrange;
+      case 'In Progress':
+        return Colors.blue;
+      default:
+        return Colors.black;
+    }
+  }
 
   void _showOrderDetails(BuildContext context, Order order) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -72,8 +72,8 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
           'Authorization': 'Bearer $token',
           'accept': '*/*',
         };
-
-        final url = 'http://logistics-api-8.somee.com/api/Driver/ViewRequests/1';
+        String? baseUrl = await AuthService.getURL();
+        final url = '$baseUrl/api/Driver/ViewRequests/1';
 
         final response = await http.get(
           Uri.parse(url),

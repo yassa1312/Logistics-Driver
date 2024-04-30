@@ -190,7 +190,7 @@ class _RegisterCarState extends State<RegisterCar> {
                             textInputAction: TextInputAction.next,
                             keyboardType: TextInputType.number, // Set keyboardType to accept numbers only
                             decoration: InputDecoration(
-                              labelText: 'Capacity',
+                              labelText: 'Capacity in Ton',
                               labelStyle: const TextStyle(
                                 color: Colors.orange,
                               ),
@@ -249,17 +249,17 @@ class _RegisterCarState extends State<RegisterCar> {
     // Attempt to parse capacity to int
     int? parsedCapacity;
     try {
-      parsedCapacity = int.parse(capacity);
+      parsedCapacity = int.parse(capacityController.text);
     } catch (e) {
-      displayToast("Capacity must be a number");
+      displayToast("Capacity must be 1, 2, 4, 8, or 10 tons only");
       return;
     }
 
-    // Check if capacity is 0
-    if (parsedCapacity == 0) {
-      displayToast("Capacity cannot be 0");
+    if (![1, 2, 4, 8, 10].contains(parsedCapacity)) {
+      displayToast("Capacity must be 1, 2, 4, 8, or 10 tons only");
       return;
     }
+
 
     // Attempt API registration
     try {
@@ -282,10 +282,10 @@ class _RegisterCarState extends State<RegisterCar> {
           "Car_Model": carModel,
           "capacity": capacity
         };
-
+        String? baseUrl = await AuthService.getURL();
         // Send registration request
         var response = await http.post(
-          Uri.parse('http://logistics-api-8.somee.com/api/Account/RegisterCar'),
+          Uri.parse('$baseUrl/api/Account/RegisterCar'),
           headers: headers,
           body: json.encode(data),
         );
