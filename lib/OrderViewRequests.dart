@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:logistics/LoginScreen.dart';
 import 'package:logistics/OrderAcceptRequest.dart';
@@ -16,18 +17,20 @@ class Order {
   final String dropOffLocation;
   final String timeStampOnCreation;
   final String rideType;
-
+  final int cost;
   Order({
     required this.requestId,
     required this.pickUpLocation,
     required this.dropOffLocation,
     required this.timeStampOnCreation,
     required this.rideType,
+    required this.cost,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       requestId: json['request_Id'] ?? '',
+      cost:json['cost'] ?? '' ,
       pickUpLocation: json['pick_Up_Location'] ?? '',
       dropOffLocation: json['drop_Off_Location'] ?? '',
       timeStampOnCreation: json['time_Stamp_On_Creation'] != null
@@ -91,12 +94,25 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
             _orders = apiOrders;
             _isLoading = false;
           });
+        } else if (response.statusCode == 400) {
+          Fluttertoast.showToast(
+              msg: "You need to register a car",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0
+          );
+          setState(() {
+            _isLoading = false;
+          });
         } else {
           // Log error if API call fails
           print('Failed to fetch orders. Status code: ${response.statusCode}');
           // Fallback to dummy data if API call fails
           _loadDummyOrders();
         }
+
       } else {
         // Log error if token is null
         print('Token is null');
@@ -119,14 +135,14 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
         pickUpLocation: 'Location A',
         dropOffLocation: 'Location B',
         timeStampOnCreation: '2022-04-10 10:00:00',
-        rideType: 'Normal',
+        rideType: 'Normal',cost: 50,
       ),
       Order(
         requestId: '2',
         pickUpLocation: 'Location C',
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
-        rideType: 'Premium',
+        rideType: 'Premium', cost: 50,
       ),
       // Add more dummy orders as needed
     ];
@@ -231,9 +247,49 @@ class OrderTile extends StatelessWidget {
               ),
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
               _buildOrderInfo('Ride Type:', order.rideType),
+              _buildOrderInfo3('Cost', order.cost, "EPG"),
+
             ],
           ),
         ),
+      ),
+    );
+  }
+  Widget _buildOrderInfo3(String title, int value, String unit) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.blue,
+            ),
+          ),
+          SizedBox(height: 4), // Add a SizedBox for spacing
+          Row(
+            children: [
+              Text(
+                value.toString(),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(width: 4), // Add a SizedBox for spacing
+              Text(
+                unit,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

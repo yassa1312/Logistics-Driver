@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:logistics/LoginScreen.dart';
 import 'package:logistics/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,17 +22,44 @@ class _RegisterCarState extends State<RegisterCar> {
   final TextEditingController colorController = TextEditingController();
   final TextEditingController carModelController = TextEditingController();
   final TextEditingController capacityController = TextEditingController();
+  late Uint8List _imageBytes1 = Uint8List(0);
+  late Uint8List _imageBytes2 = Uint8List(0);
+  late Uint8List _imageBytes3 = Uint8List(0);
+  String base64String1 = '';
+  String base64String2 = '';
+  String base64String3 = '';
   final List<String> shipmentList = [
-    'Normal Truck',
+    'Average Classic Box Truck',
     'Large Truck',
-    'Flatbed Truck',
+    'Motor Tri-cycle',
+    'Pickup Truck',
     'Refrigerated Truck',
-    'Box Truck',
-    'Tanker Truck',
-    'Dump Truck',
-    'Van Step Truck',
+    'Platform Truck',
+    'Half-ton Classic Truck',
   ];
-
+  void ImagetoBase64(File imageFile, int imageIndex) async {
+    Uint8List bytes = await imageFile.readAsBytes();
+    String base64String = base64Encode(bytes);
+    setState(() {
+      if (imageIndex == 1) {
+        base64String1 = base64String;
+        _imageBytes1 = bytes;
+      } else if (imageIndex == 2) {
+        base64String2 = base64String;
+        _imageBytes2 = bytes;
+      } else if (imageIndex == 3) {
+        base64String3 = base64String;
+        _imageBytes3 = bytes;
+      }
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _imageBytes1 = Uint8List(0);
+    _imageBytes2 = Uint8List(0);
+    _imageBytes3 = Uint8List(0);
+  }
   @override
   void dispose() {
     super.dispose();
@@ -57,24 +87,282 @@ class _RegisterCarState extends State<RegisterCar> {
         color: Colors.orange,
         child: Column(
           children: [
-            SizedBox(
-              height: 250,
-              child: Padding(
-                padding: const EdgeInsets.all(0),
-                child: Image.asset(
-                  'assets/Picture2.png', // Replace 'assets/Picture1.png' with your actual PNG file path
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
             Expanded(
-              child: Container(
+              child:
+              Container(
                 padding: const EdgeInsets.all(15),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                 ),
                 child: ListView(
                   children: [
+                    Column(
+                      children: [
+                        // Container 1
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Add an Image of your Car :',
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 20),
+                              if (_imageBytes1.isNotEmpty) // Check if image bytes are not empty
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.orange,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.memory(
+                                      _imageBytes1,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              if (_imageBytes1.isEmpty) // Display message if no image selected
+                                Text(
+                                  'No image selected',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                                      if (pickedImage != null) {
+                                        ImagetoBase64(File(pickedImage.path), 1);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.orange,
+                                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text('Gallery'),
+                                  ),
+                                  SizedBox(width: 20),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final pickedImage = await picker.pickImage(source: ImageSource.camera);
+                                      if (pickedImage != null) {
+                                        ImagetoBase64(File(pickedImage.path), 1);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.orange,
+                                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text('Camera'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Add an Image Id and License Front:',
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 20),
+                              if (_imageBytes2.isNotEmpty) // Check if image bytes are not empty
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.orange,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.memory(
+                                      _imageBytes2,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              if (_imageBytes2.isEmpty) // Display message if no image selected
+                                Text(
+                                  'No image selected',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                                      if (pickedImage != null) {
+                                        ImagetoBase64(File(pickedImage.path), 2);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.orange,
+                                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text('Gallery'),
+                                  ),
+                                  SizedBox(width: 20),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final pickedImage = await picker.pickImage(source: ImageSource.camera);
+                                      if (pickedImage != null) {
+                                        ImagetoBase64(File(pickedImage.path), 2);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.orange,
+                                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text('Camera'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Add an Image of Id and License Back:',
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 20),
+                              if (_imageBytes3.isNotEmpty) // Check if image bytes are not empty
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.orange,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.memory(
+                                      _imageBytes3,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              if (_imageBytes3.isEmpty) // Display message if no image selected
+                                Text(
+                                  'No image selected',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                                      if (pickedImage != null) {
+                                        ImagetoBase64(File(pickedImage.path), 3);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.orange,
+                                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text('Gallery'),
+                                  ),
+                                  SizedBox(width: 20),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final pickedImage = await picker.pickImage(source: ImageSource.camera);
+                                      if (pickedImage != null) {
+                                        ImagetoBase64(File(pickedImage.path), 2);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.orange,
+                                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text('Camera'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
@@ -280,7 +568,10 @@ class _RegisterCarState extends State<RegisterCar> {
           "Ride_Type": rideType,
           "color": color,
           "Car_Model": carModel,
-          "capacity": capacity
+          "capacity": capacity,
+          "carImage": "$base64String1",
+          "idIamge_1": "$base64String2",
+          "idIamge_2": "$base64String3"
         };
         String? baseUrl = await AuthService.getURL();
         // Send registration request

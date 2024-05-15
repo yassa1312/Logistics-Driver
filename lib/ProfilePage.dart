@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:logistics/OrderViewRequests.dart';
 import 'package:logistics/PasswordChange.dart';
 import 'package:logistics/auth_service.dart';
+import 'package:logistics/confirmPage.dart';
+import 'package:logistics/main.dart';
 import 'LoginScreen.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -17,9 +19,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _caR_VINController = TextEditingController();
   final TextEditingController _plateNumController = TextEditingController();
@@ -27,77 +28,32 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _carModelController = TextEditingController();
   final TextEditingController _capacityController = TextEditingController();
+  late Uint8List _imageBytes = Uint8List(0);
+  Uint8List? _carImageBytes;
+  Uint8List? _idImage1Bytes;
+  Uint8List? _idImage2Bytes;
+  String base64String = '';
+
   @override
   void initState() {
     super.initState();
     fetchProfileData();
+    _imageBytes = Uint8List(0);
   }
-
-
-  void editUserProfile() async {
-    try {
-      // Retrieve access token
-      String? token = await AuthService.getAccessToken();
-
-      if (token != null) {
-        var headers = {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json', // Specify content type
-        };
-        String? baseUrl = await AuthService.getURL();
-        var request = http.Request(
-            'PUT',
-            Uri.parse(
-                '$baseUrl/api/Account/EditMyProfile'));
-
-        // Prepare request body
-        request.headers.addAll(headers);
-        request.body = jsonEncode({
-          'password': _passwordController.text,
-          'name': _nameController.text,
-          'email': _emailController.text,
-          'phoneNumber': _phoneNumberController.text,
-          // Add other fields as needed
-        });
-
-        // Send the request
-        http.StreamedResponse response = await request.send();
-        String responseString = await response.stream.bytesToString();
-
-        if (response.statusCode == 200) {
-          Fluttertoast.showToast(
-            msg: "Profile updated successfully",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-          );
-        } else {
-          Fluttertoast.showToast(
-            msg: "Failed to update profile: ${response.reasonPhrase}",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-          );
-        }
-      } else {
-        print('Access token is null.');
-      }
-    } catch (error) {
-      print("Error editing profile: $error");
-    }
+  void ImagetoBase64(File imageFile) async {
+    Uint8List bytes = await imageFile.readAsBytes();
+    String base64String = base64Encode(bytes);
+    setState(() {
+      this.base64String = base64String;
+      _imageBytes = bytes;
+    });
   }
-
   void fetchProfileData() async {
     try {
-      // Retrieve access token
       String? token = await AuthService.getAccessToken();
 
       if (token != null) {
-        var headers = {
-          'Authorization': 'Bearer $token',
-        };
+        var headers = {'Authorization': 'Bearer $token'};
         String? baseUrl = await AuthService.getURL();
         var response = await http.get(
           Uri.parse('$baseUrl/api/Account/MyProfileDriver'),
@@ -105,16 +61,21 @@ class _ProfilePageState extends State<ProfilePage> {
         );
 
         if (response.statusCode == 200) {
-          // Decode and handle the response
           Map<String, dynamic> responseData = jsonDecode(response.body);
 
           setState(() {
-            // Assign fetched data to controllers
             _nameController.text = responseData['name'] ?? '';
             _emailController.text = responseData['email'] ?? '';
             _phoneNumberController.text = responseData['phoneNumber'] ?? '';
+            setState(() {
+              if (responseData["profile_Image"] != null) {
+                _imageBytes = base64Decode(responseData["profile_Image"]);
+              } else {
+                _imageBytes.isEmpty;
+              }
+            });;
 
-            // Access and assign car-related data if available
+
             if (responseData.containsKey('car')) {
               Map<String, dynamic> carData = responseData['car'];
               _caR_VINController.text = carData['caR_VIN'] ?? '';
@@ -123,6 +84,18 @@ class _ProfilePageState extends State<ProfilePage> {
               _colorController.text = carData['color'] ?? '';
               _carModelController.text = carData['car_Model'] ?? '';
               _capacityController.text = carData['capacity']?.toString() ?? '';
+
+              if (carData["carImage"] != null) {
+                _carImageBytes = base64Decode(carData["carImage"]);
+              }
+
+              if (carData["idIamge_1"] != null) {
+                _idImage1Bytes = base64Decode(carData["idIamge_1"]);
+              }
+
+              if (carData["idIamge_2"] != null) {
+                _idImage2Bytes = base64Decode(carData["idIamge_2"]);
+              }
             }
           });
         } else {
@@ -135,81 +108,8 @@ class _ProfilePageState extends State<ProfilePage> {
       print("Error fetching data: $error");
     }
   }
-
-  Future<bool> _sendImage(BuildContext context) async {
-    String? baseUrl = await AuthService.getURL();
-    final url = Uri.parse('$baseUrl/api/Admin/UploadFileApi');
-
-    // Check if access token and image URL are available
-    String? token = await AuthService.getAccessToken();
-    if (token == null || _imageUrlController.text.isEmpty) {
-      print('Access token or image URL is missing.');
-      displayToast('Access token or image URL is missing.');
-      return false;
-    }
-
-    // Create a File object from the image URL
-    File imageFile = File(_imageUrlController.text);
-
-    // Check if the image file exists
-    if (!imageFile.existsSync()) {
-      print('Image file does not exist.');
-      displayToast('Image file does not exist.');
-      return false;
-    }
-
-    // Read image file as bytes
-    List<int> bytes = await imageFile.readAsBytes();
-
-    // Extract filename from image path
-    String fileName = imageFile.path.split('/').last; // Extracts the last part of the path as the filename
-
-    try {
-      // Create a multipart request
-      var request = http.MultipartRequest(
-        'POST',
-        url,
-      );
-
-      // Set authorization header
-      request.headers['Authorization'] = 'Bearer $token';
-
-      // Add image file to the request
-      var image = await http.MultipartFile.fromPath(
-        'File', // field name expected by the server
-        imageFile.path,
-      );
-      request.files.add(image);
-
-      // Add filename to the request
-      request.fields['FileName'] = fileName;
-
-      // Send the request
-      var response = await request.send();
-
-      // Print entire response
-      print('Response Status Code: ${response.statusCode}');
-
-      // Check response status
-      if (response.statusCode == 200) {
-        print('Image sent successfully!');
-        displayToast( 'Image sent successfully!');
-        return true;
-      } else {
-        print('Error sending image: ${response.statusCode}');
-        displayToast('Error sending image: ${response.statusCode}');
-        return false;
-      }
-    } catch (exception) {
-      print('Error sending image: $exception');
-      displayToast( 'Error sending image');
-      return false;
-    }
-  }
-
-
   void _showProfileUpdateDialog(BuildContext context) {
-    TextEditingController passwordController = TextEditingController();
+    TextEditingController passwordController = TextEditingController(); // Controller for the password field
 
     showDialog(
       context: context,
@@ -268,7 +168,6 @@ class _ProfilePageState extends State<ProfilePage> {
       },
     );
   }
-
   void displayToast(String message) {
     Fluttertoast.showToast(
       msg: message,
@@ -280,15 +179,76 @@ class _ProfilePageState extends State<ProfilePage> {
       fontSize: 18.0,
     );
   }
+  void editUserProfile() async {
+    try {
+      // Retrieve access token
+      String? token = await AuthService.getAccessToken();
 
-  void _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: source);
+      if (token != null) {
+        var headers = {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json', // Specify content type
+        };
+        String? baseUrl = await AuthService.getURL();
+        var request = http.Request(
+            'PUT',
+            Uri.parse(
+                '$baseUrl/api/Account/EditMyProfile'));
 
-    if (pickedImage != null) {
-      setState(() {
-        _imageUrlController.text = pickedImage.path;
-      });
+        // Prepare request body
+        request.headers.addAll(headers);
+        Map<String, dynamic> requestBody = {
+          'password': _passwordController.text,
+          'name': _nameController.text,
+          'email': _emailController.text,
+          'phoneNumber': _phoneNumberController.text,
+        };
+
+        // Add profile image only if base64String is not empty
+        if (base64String.isNotEmpty) {
+          requestBody['profile_Image'] = "$base64String";
+        }
+
+        request.body = jsonEncode(requestBody);
+        // Print request body for debugging
+        print('Request Body: ${request.body}');
+
+        // Send the request
+        http.StreamedResponse response = await request.send();
+        String responseString = await response.stream.bytesToString();
+
+        print('Response Status Code: ${response.statusCode}');
+        print('Response Reason Phrase: ${response.reasonPhrase}');
+        print('Response Body: $responseString');
+
+        if (response.statusCode == 200) {
+          print('Response: $responseString');
+          Fluttertoast.showToast(
+            msg: "Profile updated successfully",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+          );
+        } else {
+          print('Failed to edit profile: ${response.reasonPhrase}');
+          Fluttertoast.showToast(
+            msg: "Failed to update profile: ${response.reasonPhrase}",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+        }
+      } else {
+        print('Access token is null.');
+      }
+    } catch (error) {
+      print("Error editing profile: $error");
     }
   }
 
@@ -307,6 +267,62 @@ class _ProfilePageState extends State<ProfilePage> {
       fit: BoxFit.cover,
     );
   }
+  Future<Map<String, dynamic>> confirmEmailCode() async {
+    String url = "http://logistics-api-8.somee.com/api/Account/ConfirmEmailCode";
+    String? token = await AuthService.getAccessToken();
+    if (token == null) {
+      // Handle case when token is not available
+      return {
+        'statusCode': -1,
+        'error': 'Access token is null',
+      };
+    }
+    Map<String, String> headers = {
+      "accept": "*/*",
+      "Authorization": "Bearer $token",
+    };
+
+
+    final response = await http.post(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      // Successful request
+      print("${response.reasonPhrase}");
+      Fluttertoast.showToast(
+        msg: "An email with code has been sent to your email to confirmed",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ConfirmEmail()),
+      );
+      return {
+        'statusCode': response.statusCode,
+        'data': jsonDecode(response.body),
+      };
+    } else {
+      // Request failed
+      print("${response.reasonPhrase}");
+      Fluttertoast.showToast(
+        msg: "Your email is already confirmed",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return {
+        'statusCode': response.statusCode,
+        'error': response.body,
+      };
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -321,53 +337,92 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_imageUrlController.text.isNotEmpty)
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10), // Adjust border radius as needed
-                    color: Colors.orange,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10), // Match the container's border radius
-                    child: Image.file(
-                      File(_imageUrlController.text),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _pickImage(ImageSource.gallery),
-                    icon: Icon(Icons.photo_library),
-                    label: Text('Gallery'),
-                  ),
-                  SizedBox(width: 20),
-                  ElevatedButton.icon(
-                    onPressed: () => _pickImage(ImageSource.camera),
-                    icon: Icon(Icons.camera_alt),
-                    label: Text('Camera'),
-                  ),
-                ],
+                child: Column(
+                  children: [
+                    Text(
+                      'Add an Image',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    if (_imageBytes.isNotEmpty) // Check if image bytes are not empty
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.orange,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            _imageBytes,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    if (_imageBytes.isEmpty) // Display message if no image selected
+                      Text(
+                        'No image selected',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final picker = ImagePicker();
+                            final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                            if (pickedImage != null) {
+                              ImagetoBase64(File(pickedImage.path));
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.orange,
+                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text('Gallery'),
+                        ),
+                        SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final picker = ImagePicker();
+                            final pickedImage = await picker.pickImage(source: ImageSource.camera);
+                            if (pickedImage != null) {
+                              ImagetoBase64(File(pickedImage.path));
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.orange,
+                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text('Camera'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (_imageUrlController.text.isNotEmpty) {
-                    _sendImage(context).then((success) {
-                      if (success) {
-                        // Handle success
-                      } else {
-                        // Handle failure
-                      }
-                    }).catchError((error) {
-                      // Handle error
-                    });
-                  }
-                },
-                child: Text('Send Image'),
-              ),
-
               SizedBox(height: 20),
               TextFormField(
                 controller: _nameController,
@@ -398,6 +453,94 @@ class _ProfilePageState extends State<ProfilePage> {
                   labelStyle: TextStyle(color: Colors.orange),
                 ),
               ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _showProfileUpdateDialog(context);
+                },
+
+                child: Text('Edit'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PasswordChange()),
+                  );
+                },
+                child: Text('Password Change'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  confirmEmailCode();
+                },
+
+                child: Text('Confirm Email'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+              ),
+              SizedBox(height: 10),
+              if (_carImageBytes != null)
+                Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.orange,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(
+                        _carImageBytes!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              if (_idImage1Bytes != null)
+                Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.orange,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(
+                        _idImage1Bytes!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              if (_idImage2Bytes != null)
+                Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.orange,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(
+                        _idImage2Bytes!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+
               SizedBox(height: 10),
               TextFormField(
                 textInputAction: TextInputAction.next,
@@ -487,21 +630,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         prefixIcon: const Icon(Icons.front_loader,color: Colors.orange,),
                       ),
                     ),
-
                   ],
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PasswordChange()),
-                  );
-                },
-                child: Text('Password Change'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
                 ),
               ),
             ],

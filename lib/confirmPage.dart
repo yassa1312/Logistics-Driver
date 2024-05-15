@@ -3,6 +3,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:logistics/LoginScreen.dart';
 import 'package:logistics/auth_service.dart';
+
+
 import 'dart:convert';
 
 import 'package:logistics/main.dart';
@@ -74,9 +76,10 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
 
       if (response.statusCode == 200) {
         print('Email confirmed successfully');
+        print("${response.reasonPhrase}");
         // Perform actions upon successful confirmation, such as navigating to another screen or showing a toast
         Fluttertoast.showToast(
-          msg: "${response.reasonPhrase}",
+          msg: "Email confirmed successfully",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
@@ -89,10 +92,11 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
           MaterialPageRoute(builder: (context) => LoginScreen()),
         );
       } else {
-        print('${response.reasonPhrase}');
+        print('Email confirmed Failed');
+        print("${response.reasonPhrase}");
         // Perform actions upon failure, such as showing an error message or retrying
         Fluttertoast.showToast(
-          msg: "${response.reasonPhrase}",
+          msg: "Email confirmed Failed",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,

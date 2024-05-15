@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:logistics/auth_service.dart';
 import 'package:logistics/main.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'GiveReason.dart';
 import 'OrderViewRequests.dart';
 
 class OrderAcceptRequest extends StatelessWidget {
@@ -40,38 +37,31 @@ class OrderAcceptRequest extends StatelessWidget {
                     _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
                     _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
                     _buildOrderInfo('Ride Type:', order.rideType),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _acceptOrder(context, order);
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          child: Text(
-                            'Accept',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
+                    SizedBox(height: 30),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _acceptOrder(context, order);
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'Accept',
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ],
         ),

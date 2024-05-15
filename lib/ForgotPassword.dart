@@ -84,7 +84,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       textInputAction: TextInputAction.done,
                       obscureText: _obscureText,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'New Password',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(
                           Icons.lock,

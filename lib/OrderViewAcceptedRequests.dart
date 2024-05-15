@@ -21,7 +21,7 @@ class Order {
   final String timeStampOnAcceptance;
   final String startTripTime;
   final String rideType;
-
+  final int cost;
   Order({
     required this.requestId,
     required this.userName,
@@ -33,11 +33,13 @@ class Order {
     required this.timeStampOnAcceptance,
     required this.startTripTime,
     required this.rideType,
+    required this.cost,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       requestId: json['request_Id'] ?? '',
+      cost: json['cost'] ?? '',
       userName: json['userName'] ?? '',
       userPhone: json['userPhone'] ?? '',
       pickUpLocation: json['pick_Up_Location'] ?? '',
@@ -162,7 +164,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         timeStampOnCreation: '2022-04-10 10:00:00',
         startTripTime: '2022-04-10 10:00:00',
         rideType: 'Normal',
-
+        cost: 50,
       ),
       Order(
         requestId: '2',
@@ -175,6 +177,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         timeStampOnCreation: '2022-04-11 12:00:00',
         startTripTime: '',
         rideType: 'Premium',
+        cost: 50,
       ),
       // Add more dummy orders as needed
     ];
@@ -269,9 +272,49 @@ class OrderTile extends StatelessWidget {
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
               _buildOrderInfo('Ride Type:', order.rideType),
               _buildStatusInfo2(order),
+              _buildOrderInfo3('Cost', order.cost, "EPG"),
+
             ],
           ),
         ),
+      ),
+    );
+  }
+  Widget _buildOrderInfo3(String title, int value, String unit) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.blue,
+            ),
+          ),
+          SizedBox(height: 4), // Add a SizedBox for spacing
+          Row(
+            children: [
+              Text(
+                value.toString(),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(width: 4), // Add a SizedBox for spacing
+              Text(
+                unit,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
