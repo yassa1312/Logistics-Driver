@@ -1,21 +1,67 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:logistics/GiveReason.dart';
 import 'package:logistics/ProfilePageUser.dart';
 import 'package:logistics/auth_service.dart';
 import 'package:logistics/main.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'OrderViewAcceptedRequests.dart';
 
-
-
-class RemoveAcceptedRequest extends StatelessWidget {
+class RemoveAcceptedRequest extends StatefulWidget {
   final Order order;
 
-  const RemoveAcceptedRequest({required this.order, Key? key}) : super(key: key);
+  RemoveAcceptedRequest({required this.order, Key? key}) : super(key: key);
+
+  @override
+  _RemoveAcceptedRequestState createState() => _RemoveAcceptedRequestState();
+}
+
+class _RemoveAcceptedRequestState extends State<RemoveAcceptedRequest> {
+  late Uint8List _imageBytes = Uint8List(0);
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfileData();
+  }
+
+  void fetchProfileData() async {
+    try {
+      String? token = await AuthService.getAccessToken();
+
+      if (token != null) {
+        var headers = {'Authorization': 'Bearer $token'};
+        String? baseUrl = await AuthService.getURL();
+        var response = await http.get(
+          Uri.parse('$baseUrl/api/Driver/RequestFlutter/${widget.order.requestId}'),
+          headers: headers,
+        );
+
+        if (response.statusCode == 200) {
+          Map<String, dynamic> responseData = jsonDecode(response.body);
+          if (responseData["load_Image"] != null) {
+            setState(() {
+              _imageBytes = base64Decode(responseData["load_Image"]);
+            });
+          } else {
+            setState(() {
+              _imageBytes = Uint8List(0);
+            });
+          }
+        } else {
+          print('Failed to fetch profile data: ${response.reasonPhrase}');
+        }
+      } else {
+        print('Access token is null.');
+      }
+    } catch (error) {
+      print("Error fetching data: $error");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +83,43 @@ class RemoveAcceptedRequest extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildOrderInfo('Request ID:', order.requestId),
-                    _buildOrderInfo('Pick Up Location:', order.pickUpLocation),
-                    _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
-                    _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
-                    _buildOrderInfo('Ride Type:', order.rideType),
-                    SizedBox(height: 20),
+                    _buildOrderInfo('Request ID:', widget.order.requestId),
+                    _buildOrderInfo('Pick Up Location:', widget.order.pickUpLocation),
+                    _buildOrderInfo('Drop Off Location:', widget.order.dropOffLocation),
+                    _buildOrderInfo('Time Stamp On Creation:', widget.order.timeStampOnCreation),
+                    _buildOrderInfo('Ride Type:', widget.order.rideType),
+                    if (_imageBytes.isNotEmpty)
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.orange,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            _imageBytes,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    SizedBox(height: 10),
+                    if (_imageBytes.isEmpty) SizedBox(height: 0),
+                    SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              _StartOrder(context, order);
+                              _startOrder(context, widget.order);
                             },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
@@ -67,20 +137,41 @@ class RemoveAcceptedRequest extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              _refuseOrder(context, order);
+                              if (widget.order.timeStampOnAcceptance.isEmpty) {
+                                Fluttertoast.showToast(
+                                  msg: 'Trip has not been accepted yet.',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => GiveReason(requestId: widget.order.requestId),
+                                  ),
+                                );
+                              }
                             },
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                              elevation: MaterialStateProperty.all<double>(10),
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                               child: Text(
-                                'Refuse',
+                                'Cancel',
                                 style: TextStyle(fontSize: 18, color: Colors.white),
                               ),
                             ),
@@ -94,15 +185,14 @@ class RemoveAcceptedRequest extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              if (order.timeStampOnAcceptance.isNotEmpty) {
+                              if (widget.order.timeStampOnAcceptance.isNotEmpty) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ProfilePageUser(requestId: order.requestId),
+                                    builder: (context) => ProfilePageUser(requestId: widget.order.requestId),
                                   ),
                                 );
                               } else {
-                                // Show a Flutter toast message indicating that the trip has not been accepted yet
                                 Fluttertoast.showToast(
                                   msg: 'Trip has not been accepted yet.',
                                   toastLength: Toast.LENGTH_SHORT,
@@ -140,7 +230,7 @@ class RemoveAcceptedRequest extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              _endOrder(context, order);
+                              _endOrder(context, widget.order);
                             },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
@@ -201,9 +291,6 @@ class RemoveAcceptedRequest extends StatelessWidget {
     );
   }
 
-
-
-
   void _launchMap(String location) async {
     String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$location';
     if (await canLaunch(googleUrl)) {
@@ -214,12 +301,11 @@ class RemoveAcceptedRequest extends StatelessWidget {
   }
 }
 
-Future<void> _StartOrder(BuildContext context, Order order) async {
+Future<void> _startOrder(BuildContext context, Order order) async {
   try {
     String? token = await AuthService.getAccessToken();
 
     if (token == null) {
-      print('Access token not found.');
       Fluttertoast.showToast(
         msg: 'Access token not found.',
         toastLength: Toast.LENGTH_SHORT,
@@ -256,8 +342,6 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
         MaterialPageRoute(builder: (context) => Home()),
       );
     } else if (response.statusCode == 401) {
-      // Unauthorized, token expired or invalid
-      print('Unauthorized: ${response.statusCode}');
       Fluttertoast.showToast(
         msg: 'Unauthorized: ${response.statusCode}',
         toastLength: Toast.LENGTH_SHORT,
@@ -265,9 +349,7 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
-      // Handle token expiration or invalid token here, maybe redirect to login
-    }  else if (order.startTripTime.isNotEmpty) {
-      // Show a toast message indicating that the trip has already started
+    } else if (order.startTripTime.isNotEmpty) {
       Fluttertoast.showToast(
         msg: 'Trip has already started for order ${order.requestId}.',
         toastLength: Toast.LENGTH_SHORT,
@@ -276,9 +358,7 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-    }else {
-      // Other server errors
-      print('Failed to start order: ${response.statusCode}');
+    } else {
       Fluttertoast.showToast(
         msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
         toastLength: Toast.LENGTH_SHORT,
@@ -288,7 +368,6 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
       );
     }
   } catch (error) {
-    print('Error starting order: $error');
     Fluttertoast.showToast(
       msg: 'Error starting order: $error',
       toastLength: Toast.LENGTH_SHORT,
@@ -298,93 +377,30 @@ Future<void> _StartOrder(BuildContext context, Order order) async {
     );
   }
 }
-void _refuseOrder(BuildContext context, Order order) async {
-  // Check if startTripTime is empty
-  if (order.startTripTime.isNotEmpty) {
+
+Future<void> _endOrder(BuildContext context, Order order) async {
+  if (order.startTripTime.isEmpty) {
     Fluttertoast.showToast(
-      msg: 'Cannot refuse order with start trip time',
+      msg: 'Cannot end order without starting trip',
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Colors.red,
       textColor: Colors.white,
     );
-    return; // Return early if startTripTime is not empty
+    return;
   }
 
   try {
     String? token = await AuthService.getAccessToken();
 
     if (token == null) {
-      print('Access token not found.');
-      return;
-    }
-    String? baseUrl = await AuthService.getURL();
-    String url = '$baseUrl/api/Driver/RemoveAcceptedRequest/${order.requestId}';
-
-    Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
-      'accept': '*/*',
-    };
-
-    var response = await http.put(
-      Uri.parse(url),
-      headers: headers,
-    );
-
-    if (response.statusCode == 200) {
       Fluttertoast.showToast(
-        msg: 'Order ${order.requestId} refused',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
-    }  else {
-      // Other server errors
-      print('Failed to start order: ${response.statusCode}');
-      Fluttertoast.showToast(
-        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+        msg: 'Access token not found.',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0,
       );
-    }
-
-  } catch (error) {
-    print('Error refusing order: $error');
-    Fluttertoast.showToast(
-      msg: 'Error refusing order',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
-  }
-}
-Future<void> _endOrder(BuildContext context, Order order) async {
-  // Check if startTripTime is empty
-  if (order.startTripTime.isEmpty) {
-    Fluttertoast.showToast(
-      msg: 'Cannot End order without start trip',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
-    return; // Return early if startTripTime is not empty
-  }
-
-  try {
-    String? token = await AuthService.getAccessToken();
-
-    if (token == null) {
-      print('Access token not found.');
       return;
     }
     String? baseUrl = await AuthService.getURL();
@@ -402,7 +418,7 @@ Future<void> _endOrder(BuildContext context, Order order) async {
 
     if (response.statusCode == 200) {
       Fluttertoast.showToast(
-        msg: 'Order ${order.requestId} is Ended',
+        msg: 'Order ${order.requestId} ended successfully',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.green,
@@ -412,23 +428,18 @@ Future<void> _endOrder(BuildContext context, Order order) async {
         context,
         MaterialPageRoute(builder: (context) => Home()),
       );
-    }  else {
-      // Other server errors
-      print('Failed to start order: ${response.statusCode}');
+    } else {
       Fluttertoast.showToast(
-        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+        msg: 'Failed to end order ${order.requestId}: ${response.statusCode}',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0,
       );
     }
-
   } catch (error) {
-    print('Error refusing order: $error');
     Fluttertoast.showToast(
-      msg: 'Error refusing order',
+      msg: 'Error ending order: $error',
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Colors.red,

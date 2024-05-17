@@ -148,8 +148,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                textStyle: TextStyle(color: Colors.white),
+                foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                textStyle: TextStyle(fontSize: 18),
               ),
               child: const Text('Yes'),
             ),
@@ -491,7 +491,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   textStyle: TextStyle(fontSize: 18),
                 ),
               ),
-              SizedBox(height: 10),
+              if (_carImageBytes==null) // Display message if no image selected
+              SizedBox(height: 0),
               if (_carImageBytes != null)
                 Container(
                   child: Container(
@@ -540,7 +541,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-
               SizedBox(height: 10),
               TextFormField(
                 textInputAction: TextInputAction.next,

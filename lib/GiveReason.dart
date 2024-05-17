@@ -56,7 +56,8 @@ class _GiveReasonState extends State<GiveReason> {
                 await endTrip(widget.requestId, comment);
               },
               style: ElevatedButton.styleFrom(
-                textStyle: TextStyle(fontSize: 20), // Increase the font size
+                foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                textStyle: TextStyle(fontSize: 18),
               ),
               child: Text('Cancel Trip'),
             ),
@@ -106,7 +107,7 @@ class _GiveReasonState extends State<GiveReason> {
         // Define request body
         Map<String, dynamic> requestBody = {
           'request_Id': widget.requestId,
-          'comment': comment,
+          'comment':comment,
         };
 
         // Encode request body to JSON

@@ -16,7 +16,7 @@ class Order {
   final String timeStampOnCreation;
   final String startTripTime;
   final String rideType;
-
+  final String canceled_By;
   Order({
     required this.requestId,
     required this.pickUpLocation,
@@ -24,6 +24,7 @@ class Order {
     required this.timeStampOnCreation,
     required this.startTripTime,
     required this.rideType,
+    required this.canceled_By,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -38,6 +39,7 @@ class Order {
           ? DateTime.parse(json['start_Trip_Time']).toString()
           : '',
       rideType: json['ride_Type'] ?? '',
+      canceled_By: json['canceled_By'] ?? '',
     );
   }
 }
@@ -124,7 +126,7 @@ class _ViewMyCanceledRequestsState extends State<ViewMyCanceledRequests> {
         dropOffLocation: 'Location B',
         timeStampOnCreation: '2022-04-10 10:00:00',
         startTripTime: '2022-04-10 10:00:00',
-        rideType: 'Normal',
+        rideType: 'Normal', canceled_By:'User',
       ),
       Order(
         requestId: '2',
@@ -132,7 +134,7 @@ class _ViewMyCanceledRequestsState extends State<ViewMyCanceledRequests> {
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
         startTripTime: '2022-04-10 10:00:00',
-        rideType: 'Premium',
+        rideType: 'Premium',canceled_By:'Driver',
       ),
       // Add more dummy orders as needed
     ];
@@ -217,6 +219,7 @@ class OrderTile extends StatelessWidget {
               _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
               _buildOrderInfo('Ride Type:', order.rideType),
+              _buildOrderInfo('Cancel By:', order.canceled_By),
             ],
           ),
         ),

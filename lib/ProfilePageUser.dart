@@ -259,16 +259,6 @@ class _ProfilePageState extends State<ProfilePageUser> {
               ),
               SizedBox(height: 10),
               TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email, color: Colors.orange),
-                  labelStyle: TextStyle(color: Colors.orange),
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
                 controller: _phoneNumberController,
                 decoration: InputDecoration(
                   labelText: 'Phone Number',

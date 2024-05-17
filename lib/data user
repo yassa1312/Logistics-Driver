@@ -10,3 +10,294 @@ time_Stamp_On_Creation":"2024-04-26T00:10:52.0129251+00:00",
 "load_Weight":"Average (4 ton)",
 "comment":null,"rating":null,"duration":null,
 "finished":false,"load_Image":null}]
+SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _StartOrder(context, order);
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'Start',
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (order.timeStampOnAcceptance.isEmpty) {
+                                // Show a Flutter toast message indicating that the trip has not ended yet
+                                Fluttertoast.showToast(
+                                  msg: 'Trip has not Acceptance yet.',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+                              } else {
+                                // Navigate to the EndTripPage if the trip has ended
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => GiveReason(requestId: order.requestId),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                              elevation: MaterialStateProperty.all<double>(10),
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (order.timeStampOnAcceptance.isNotEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProfilePageUser(requestId: order.requestId),
+                                  ),
+                                );
+                              } else {
+                                // Show a Flutter toast message indicating that the trip has not been accepted yet
+                                Fluttertoast.showToast(
+                                  msg: 'Trip has not been accepted yet.',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+                              }
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                              elevation: MaterialStateProperty.all<double>(10),
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'User Data',
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _endOrder(context, order);
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'End Trip',
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Future<void> _StartOrder(BuildContext context, Order order) async {
+                      try {
+                        String? token = await AuthService.getAccessToken();
+
+                        if (token == null) {
+                          print('Access token not found.');
+                          Fluttertoast.showToast(
+                            msg: 'Access token not found.',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                          );
+                          return;
+                        }
+                        String? baseUrl = await AuthService.getURL();
+
+                        String url = '$baseUrl/api/Driver/StartTrip/${order.requestId}';
+
+                        Map<String, String> headers = {
+                          'Authorization': 'Bearer $token',
+                          'accept': '*/*',
+                        };
+
+                        var response = await http.put(
+                          Uri.parse(url),
+                          headers: headers,
+                        );
+
+                        if (response.statusCode == 200) {
+                          Fluttertoast.showToast(
+                            msg: 'Order ${order.requestId} started successfully',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.green,
+                            textColor: Colors.white,
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home()),
+                          );
+                        } else if (response.statusCode == 401) {
+                          // Unauthorized, token expired or invalid
+                          print('Unauthorized: ${response.statusCode}');
+                          Fluttertoast.showToast(
+                            msg: 'Unauthorized: ${response.statusCode}',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                          );
+                          // Handle token expiration or invalid token here, maybe redirect to login
+                        }  else if (order.startTripTime.isNotEmpty) {
+                          // Show a toast message indicating that the trip has already started
+                          Fluttertoast.showToast(
+                            msg: 'Trip has already started for order ${order.requestId}.',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                        }else {
+                          // Other server errors
+                          print('Failed to start order: ${response.statusCode}');
+                          Fluttertoast.showToast(
+                            msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                          );
+                        }
+                      } catch (error) {
+                        print('Error starting order: $error');
+                        Fluttertoast.showToast(
+                          msg: 'Error starting order: $error',
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                        );
+                      }
+                    }
+
+                    Future<void> _endOrder(BuildContext context, Order order) async {
+                      // Check if startTripTime is empty
+                      if (order.startTripTime.isEmpty) {
+                        Fluttertoast.showToast(
+                          msg: 'Cannot End order without start trip',
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                        );
+                        return; // Return early if startTripTime is not empty
+                      }
+
+                      try {
+                        String? token = await AuthService.getAccessToken();
+
+                        if (token == null) {
+                          print('Access token not found.');
+                          return;
+                        }
+                        String? baseUrl = await AuthService.getURL();
+                        String url = '$baseUrl/api/Driver/EndTrip/${order.requestId}';
+
+                        Map<String, String> headers = {
+                          'Authorization': 'Bearer $token',
+                          'accept': '*/*',
+                        };
+
+                        var response = await http.put(
+                          Uri.parse(url),
+                          headers: headers,
+                        );
+
+                        if (response.statusCode == 200) {
+                          Fluttertoast.showToast(
+                            msg: 'Order ${order.requestId} is Ended',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.green,
+                            textColor: Colors.white,
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home()),
+                          );
+                        }  else {
+                          // Other server errors
+                          print('Failed to start order: ${response.statusCode}');
+                          Fluttertoast.showToast(
+                            msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                        }
+
+                      } catch (error) {
+                        print('Error refusing order: $error');
+                        Fluttertoast.showToast(
+                          msg: 'Error refusing order',
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                        );
+                      }
+                    }

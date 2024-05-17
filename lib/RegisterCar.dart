@@ -414,7 +414,7 @@ class _RegisterCarState extends State<RegisterCar> {
                     const SizedBox(height: 10),
                     TextFormField(
                       textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.number,
                       controller: caR_VINController,
                       decoration: const InputDecoration(
                         labelText: 'CAR_VIN',

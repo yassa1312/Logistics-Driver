@@ -1,16 +1,71 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:logistics/auth_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:logistics/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'OrderViewRequests.dart';
+import 'auth_service.dart';
 
-class OrderAcceptRequest extends StatelessWidget {
+
+class OrderAcceptRequest extends StatefulWidget {
   final Order order;
 
-  const OrderAcceptRequest({required this.order, Key? key}) : super(key: key);
+  OrderAcceptRequest({required this.order, Key? key}) : super(key: key);
+
+  @override
+  _OrderAcceptRequestState createState() => _OrderAcceptRequestState();
+}
+
+class _OrderAcceptRequestState extends State<OrderAcceptRequest> {
+  late Uint8List _imageBytes = Uint8List(0);
+  String base64String = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfileData();
+    _imageBytes = Uint8List(0);
+  }
+
+  void fetchProfileData() async {
+    try {
+      String? token = await AuthService.getAccessToken();
+
+      if (token != null) {
+        var headers = {
+          'Authorization': 'Bearer $token',
+        };
+        String? baseUrl = await AuthService.getURL();
+        var response = await http.get(
+          Uri.parse('$baseUrl/api/Driver/RequestFlutter/${widget.order.requestId}'),
+          headers: headers,
+        );
+
+        if (response.statusCode == 200) {
+          Map<String, dynamic> responseData = jsonDecode(response.body);
+          print(responseData);
+          if (responseData["load_Image"] != null) {
+            setState(() {
+              _imageBytes = base64Decode(responseData["load_Image"]);
+            });
+          } else {
+            setState(() {
+              _imageBytes = Uint8List(0);
+            });
+          }
+        } else {
+          print('Failed to fetch profile data: ${response.reasonPhrase}');
+        }
+      } else {
+        print('Access token is null.');
+      }
+    } catch (error) {
+      print("Error fetching data: $error");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,18 +87,43 @@ class OrderAcceptRequest extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildOrderInfo('Request ID:', order.requestId),
-                    _buildOrderInfo('Pick Up Location:', order.pickUpLocation),
-                    _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
-                    _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),
-                    _buildOrderInfo('Ride Type:', order.rideType),
-                    SizedBox(height: 30),
+                    _buildDetailItem('Order Id', widget.order.requestId),
+                    _buildDetailItem('Pick Up Location', widget.order.pickUpLocation),
+                    _buildDetailItem('Drop Off Location', widget.order.dropOffLocation),
+                    _buildDetailItem('Time Stamp On Creation', widget.order.timeStampOnCreation),
+                    _buildDetailItem('Ride Type', widget.order.rideType),
+                    if (_imageBytes.isNotEmpty)
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.orange,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            _imageBytes,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    SizedBox(height: 10),
+                    if (_imageBytes.isEmpty)
+                      SizedBox(height: 0),
+                    SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              _acceptOrder(context, order);
+                              _acceptOrder(context, widget.order); // Pass widget.order here
                             },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
@@ -69,13 +149,14 @@ class OrderAcceptRequest extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderInfo(String title, String value) {
+  Widget _buildDetailItem(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
         ),
         SizedBox(height: 8),
         Container(
@@ -84,17 +165,7 @@ class OrderAcceptRequest extends StatelessWidget {
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(10),
           ),
-          child: title == 'Delivery Location'
-              ? InkWell(
-            onTap: () {
-              _launchMap(value);
-            },
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 16, color: Colors.blue, decoration: TextDecoration.underline),
-            ),
-          )
-              : Text(
+          child: Text(
             value,
             style: TextStyle(fontSize: 16, color: Colors.black87),
           ),
@@ -103,8 +174,6 @@ class OrderAcceptRequest extends StatelessWidget {
       ],
     );
   }
-
-
 
   void _acceptOrder(BuildContext context, Order order) async {
     try {
@@ -130,7 +199,7 @@ class OrderAcceptRequest extends StatelessWidget {
       );
       if (response.statusCode == 200) {
         Fluttertoast.showToast(
-          msg: 'Order ${order.requestId} Accepted',
+          msg: 'Order ${widget.order.requestId} Accepted',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,
@@ -140,9 +209,9 @@ class OrderAcceptRequest extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (context) => Home()),
         );
-       } else {
+      } else {
         Fluttertoast.showToast(
-          msg: 'Failed to accept order ${order.requestId}',
+          msg: 'Failed to accept order ${widget.order.requestId}',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
@@ -161,90 +230,6 @@ class OrderAcceptRequest extends StatelessWidget {
     }
   }
 
-
-  }
-
-  void _launchMap(String location) async {
-    String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$location';
-    if (await canLaunch(googleUrl)) {
-      await launch(googleUrl);
-    } else {
-      throw 'Could not launch $googleUrl';
-    }
-  }
-
-Future<void> _StartOrder(BuildContext context, Order order) async {
-  try {
-    String? token = await AuthService.getAccessToken();
-
-    if (token == null) {
-      print('Access token not found.');
-      Fluttertoast.showToast(
-        msg: 'Access token not found.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-      return;
-    }
-    String? baseUrl = await AuthService.getURL();
-    String url = '$baseUrl/api/Trip/Start/${order.requestId}';
-
-    Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
-      'accept': '*/*',
-    };
-
-    var response = await http.put(
-      Uri.parse(url),
-      headers: headers,
-    );
-
-    if (response.statusCode == 200) {
-      Fluttertoast.showToast(
-        msg: 'Order ${order.requestId} started successfully',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
-    } else if (response.statusCode == 401) {
-      // Unauthorized, token expired or invalid
-      print('Unauthorized: ${response.statusCode}');
-      print('Unauthorized: ${response.body}');
-      Fluttertoast.showToast(
-        msg: 'Unauthorized: ${response.statusCode}',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-      // Handle token expiration or invalid token here, maybe redirect to login
-    } else {
-      // Other server errors
-      print('Failed to start order: ${response.statusCode}');
-      print('Failed to start order: ${response.body}');
-      Fluttertoast.showToast(
-        msg: 'Failed to start order ${order.requestId}: ${response.statusCode}',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
-  } catch (error) {
-    print('Error starting order: $error');
-    Fluttertoast.showToast(
-      msg: 'Error starting order: $error',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
-  }
 }
+
+

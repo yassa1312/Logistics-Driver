@@ -96,7 +96,7 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
           });
         } else if (response.statusCode == 400) {
           Fluttertoast.showToast(
-              msg: "You need to register a car",
+              msg: "${response.body}",
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.CENTER,
               backgroundColor: Colors.red,
@@ -108,7 +108,7 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
           });
         } else {
           // Log error if API call fails
-          print('Failed to fetch orders. Status code: ${response.statusCode}');
+          print('${response.reasonPhrase}');
           // Fallback to dummy data if API call fails
           _loadDummyOrders();
         }
