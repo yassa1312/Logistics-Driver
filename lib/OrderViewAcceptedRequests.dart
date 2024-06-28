@@ -176,7 +176,7 @@ class _OrderDriverViewAcceptedRequestsState extends State<OrderDriverViewAccepte
         timeStampOnAcceptance: '2022-04-10 10:00:00',
         timeStampOnCreation: '2022-04-11 12:00:00',
         startTripTime: '',
-        rideType: 'Premium',
+        rideType: 'Average Classic Box Truck',
         cost: 50,
       ),
       // Add more dummy orders as needed
@@ -258,7 +258,7 @@ class OrderTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildOrderInfo('Request ID:', order.requestId),
+              //_buildOrderInfo('Request ID:', order.requestId),
               _buildOrderInfo('User Name:', order.userName),
               _buildOrderInfo('User Phone:', order.userPhone),//TODO in phone
               MapLocationWidget(

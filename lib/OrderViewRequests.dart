@@ -142,7 +142,7 @@ class _OrderViewRequestsState extends State<OrderViewRequests> {
         pickUpLocation: 'Location C',
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
-        rideType: 'Premium', cost: 50,
+        rideType: 'Average Classic Box Truck', cost: 50,
       ),
       // Add more dummy orders as needed
     ];
@@ -236,7 +236,7 @@ class OrderTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildOrderInfo('Request ID:', order.requestId),
+              //_buildOrderInfo('Request ID:', order.requestId),
               MapLocationWidget(
                 locationLabel: 'Pick Up Location:',
                 location: order.pickUpLocation,

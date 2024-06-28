@@ -83,7 +83,7 @@ class _RemoveAcceptedRequestState extends State<RemoveAcceptedRequest> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildOrderInfo('Request ID:', widget.order.requestId),
+                    //_buildOrderInfo('Request ID:', widget.order.requestId),
                     _buildOrderInfo('Pick Up Location:', widget.order.pickUpLocation),
                     _buildOrderInfo('Drop Off Location:', widget.order.dropOffLocation),
                     _buildOrderInfo('Time Stamp On Creation:', widget.order.timeStampOnCreation),
@@ -143,10 +143,20 @@ class _RemoveAcceptedRequestState extends State<RemoveAcceptedRequest> {
                             onPressed: () {
                               if (widget.order.timeStampOnAcceptance.isEmpty) {
                                 Fluttertoast.showToast(
-                                  msg: 'Trip has not been accepted yet.',
+                                  msg: 'Trip has not Acceptance yet.',
                                   toastLength: Toast.LENGTH_SHORT,
                                   gravity: ToastGravity.BOTTOM,
                                   backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+                              }
+                              else if (widget.order.startTripTime.isNotEmpty) {
+                                Fluttertoast.showToast(
+                                  msg: 'Trip has already started.',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.blue,
                                   textColor: Colors.white,
                                   fontSize: 16.0,
                                 );

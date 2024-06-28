@@ -60,7 +60,6 @@ class _HomeState extends State<Home> {
             });
           },
           items: const <BottomNavigationBarItem>[
-            
             BottomNavigationBarItem(
               icon: Icon(Icons.content_paste),
               label: 'Orders',

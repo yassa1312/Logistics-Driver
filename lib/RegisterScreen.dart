@@ -23,17 +23,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController roleController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final List<String> validPrefixes = ["010", "011", "012", "015"];
+  String? validatePhoneNumber(String phone) {
+    if (phone.isEmpty) {
+      return 'Phone Number is mandatory.';
+    }
+
+    // Check if the phone number starts with one of the valid prefixes
+    if (!validPrefixes.any((prefix) => phone.startsWith(prefix))) {
+      return 'Phone number must start with 010, 011, 012, or 015.';
+    }
+
+    // Check if the phone number is exactly 11 digits long
+    if (phone.length != 11) {
+      return 'Phone number must be exactly 11 digits long.';
+    }
+
+    // If all validations pass, return null
+    return null;
+  }
+
+  String? validateEmailDomain(String email) {
+    if (email.isEmpty) {
+      return 'Email is mandatory.';
+    }
+
+    final domain = email.split('@').last;
+    if (!['gmail.com', 'yahoo.com', 'hotmail.com'].contains(domain)) {
+      return 'Only Gmail, Yahoo, and Hotmail addresses are allowed.';
+    }
+    return null;
+  }
+  String? validatePassword(String password, String confirmPassword) {
+    if (password.isEmpty || confirmPassword.isEmpty) {
+      return 'Passwords are mandatory.';
+    }
+
+    // Check if the passwords match
+    if (password != confirmPassword) {
+      return 'Passwords do not match.';
+    }
+
+    // Check if the password length is at least 8 characters
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long.';
+    }
+
+    // Check if the password contains at least one uppercase letter
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain at least one uppercase letter.';
+    }
+
+    // Check if the password contains at least one lowercase letter
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain at least one lowercase letter.';
+    }
+
+    // Check if the password contains at least one digit
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain at least one digit.';
+    }
+
+    // If all validations pass, return null
+    return null;
+  }
 
 
   bool obscureText1 = true;
   double strength = 0.0;
-  String userAutomation = 'driver';
 
   @override
   void initState() {
     super.initState();
-    roleController.text = userAutomation; // Set initial value to userAutomation
-    roleController.addListener(_updateUserAutomation); // Add listener to roleController
+     // Add listener to roleController
   }
 
   void togglePasswordVisibility1() {
@@ -42,16 +104,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
-  void _updateUserAutomation() {
-    // Update the userAutomation variable with the text field value
-    setState(() {
-      userAutomation = roleController.text;
-    });
-  }
-
-  void _sendDataToAPI() {
-    print('Sending text to API: $userAutomation');
-  }
 
   @override
   void dispose() {
@@ -93,28 +145,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.text,
                       controller: nameController,
-                      decoration: const InputDecoration(
+                      maxLength: 28,
+                      decoration: InputDecoration(
                         labelText: 'Name',
-                        prefixIcon: Icon(Icons.account_box,color: Colors.orange,),
-                        labelStyle: TextStyle(
+                        prefixIcon: const Icon(
+                          Icons.account_box,
                           color: Colors.orange,
                         ),
-                        border: OutlineInputBorder(),
+                        labelStyle: const TextStyle(
+                          color: Colors.orange,
+                        ),
+                        border: const OutlineInputBorder(),
+                        counterText: '${nameController.text.length}/28',
                       ),
+                      onChanged: (text) {
+                        setState(() {
+                          // This will trigger a rebuild to update the counterText
+                        });
+                      },
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.phone,
                       controller: phoneNumberController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Phone Number',
-                        labelStyle: TextStyle(
+                        labelStyle: const TextStyle(
                           color: Colors.orange,
                         ),
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.phone,color: Colors.orange,),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.phone, color: Colors.orange),
+                        counterText: '${phoneNumberController.text.length}/11',
                       ),
+                      onChanged: (text) {
+                        setState(() {
+                          // This will trigger a rebuild to update the counterText
+                        });
+                      },
+                      maxLength: 11, // Limit input to 11 digits
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          displayToast('Please enter a phone number');
+                          return 'Please enter a phone number';
+                        }
+
+                        // Check if the phone number starts with one of the valid prefixes
+                        if (!validPrefixes.any((prefix) => value.startsWith(prefix))) {
+                          displayToast('Phone number must start with 010, 011, 012, or 015.');
+                          return 'Phone number must start with 010, 011, 012, or 015.';
+                        }
+
+                        // Check if the phone number is exactly 11 digits long
+                        if (value.length != 11) {
+                          displayToast('Phone number must be exactly 11 digits long.');
+                          return 'Phone number must be exactly 11 digits long.';
+                        }
+
+                        // If all validations pass, return null
+                        return null;
+                      },
+
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
@@ -122,12 +213,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
-                        labelText: 'Email',labelStyle: TextStyle(
-                        color: Colors.orange,
-                      ),
+                        labelText: 'Email',
+                        labelStyle: TextStyle(color: Colors.orange),
                         border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.email,color: Colors.orange,),
+                        prefixIcon: Icon(Icons.email, color: Colors.orange),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Email is mandatory.';
+                        }
+                        final domain = value.split('@').last;
+                        if (!['gmail.com', 'yahoo.com', 'hotmail.com'].contains(domain)) {
+                          return 'Only Gmail, Yahoo, and Hotmail addresses are allowed.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
@@ -140,41 +240,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textInputAction: TextInputAction.next,
                             obscureText: obscureText1,
                             onChanged: (password) {
+                              // You can add any necessary logic here on password change
+                              // For real-time validation, consider using FormFieldValidator or FormFieldSetter
+                            },
+                            validator: (password) {
+                              if (password == null || password.isEmpty) {
+                                return 'Password is mandatory.';
+                              }
+
+                              // Check if the password length is at least 8 characters
+                              if (password.length < 8) {
+                                return 'Password must be at least 8 characters long.';
+                              }
+
+                              // Check if the password contains at least one uppercase letter
+                              if (!password.contains(RegExp(r'[A-Z]'))) {
+                                return 'Password must contain at least one uppercase letter.';
+                              }
+
+                              // Check if the password contains at least one lowercase letter
+                              if (!password.contains(RegExp(r'[a-z]'))) {
+                                return 'Password must contain at least one lowercase letter.';
+                              }
+
+                              // Check if the password contains at least one digit
+                              if (!password.contains(RegExp(r'[0-9]'))) {
+                                return 'Password must contain at least one digit.';
+                              }
+
+                              // If all validations pass, return null
+                              return null;
                             },
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              labelStyle: const TextStyle(
-                                color: Colors.orange,
-                              ),
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(Icons.lock,color: Colors.orange,),
+                              labelStyle: TextStyle(color: Colors.orange),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.lock, color: Colors.orange),
                               suffixIcon: GestureDetector(
                                 onTap: togglePasswordVisibility1,
                                 child: Icon(
-                                  obscureText1
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,color: Colors.orange,
+                                  obscureText1 ? Icons.visibility : Icons.visibility_off,
+                                  color: Colors.orange,
                                 ),
                               ),
                             ),
                           ),
+
+
                           const SizedBox(height: 10),
                           TextFormField(
                             controller: confirmPasswordController,
                             textInputAction: TextInputAction.done,
                             obscureText: obscureText1,
                             onFieldSubmitted: (_) {
-                              String enteredPassword = confirmPasswordController.text;
-                              String originalPassword = passwordController.text;
-
-                              if (enteredPassword == originalPassword) {
-                                _updateUserAutomation();
-                                onRegisterSuccess();
-                              } else {
-
-                                Fluttertoast.showToast(msg: "Passwords do not match.");
-                              }
+                              onRegisterSuccess();
                             },
+
                             decoration: InputDecoration(
                               labelText: 'Confirm Password',
                               labelStyle: const TextStyle(
@@ -190,10 +311,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ),
                             ),
+
                           ),
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
@@ -204,14 +327,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ), backgroundColor: Colors.orange,
                         ),
                         onPressed: () {
-                          String password = passwordController.text;
-                          String confirmPassword = confirmPasswordController.text;
-                          if (password == confirmPassword) {
-                            _updateUserAutomation();
                             onRegisterSuccess();
-                          } else {
-                            Fluttertoast.showToast(msg: "Passwords do not match.");
-                          }
                         },
                         child: const Text(
                           "Register",
@@ -260,6 +376,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+
   void onRegisterSuccess() async {
     String email = emailController.text;
     String name = nameController.text;
@@ -267,42 +384,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String role = roleController.text;
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
+    // Check if the name is at least 3 characters
+    if (name.length < 4) {
+      displayToast("Name must be at least 3 characters.");
+      return;
+    }
+
+    // Check if the phone number is empty
+    if (phone.isEmpty) {
+      displayToast("Phone Number is mandatory.");
+      return;
+    }// Validate phone number
+    String? phoneError = validatePhoneNumber(phone);
+    if (phoneError != null) {
+      displayToast(phoneError);
+      return;
+    }
+    // Validate email domain
+    String? emailError = validateEmailDomain(email);
+    if (emailError != null) {
+      displayToast(emailError);
+      return;
+    }
 
     // Check if the passwords match
-    if (password == confirmPassword) {
-      // Check if the name is at least 3 characters
-      if (name.length < 4) {
-        displayToast("Name must be at least 3 characters.");
-        return;
+    String? passwordError = validatePassword(password, confirmPassword);
+    if (passwordError != null) {
+      displayToast(passwordError);
+      return;
+    }
+
+
+    // Attempt API registration
+    try {
+      bool registrationSuccess = await RegistrationAPI.registerUser(email, password, name, phone, role);
+
+      RegistrationAPI.displayRegistrationResult(registrationSuccess); // Call displayRegistrationResult
+
+      if (registrationSuccess) {
+        Navigator.pop(context);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
       }
-
-      // Check if the phone number is empty
-      if (phone.isEmpty) {
-        displayToast("Phone Number is mandatory.");
-        return;
-      }
-
-      // Attempt API registration
-      try {
-        bool registrationSuccess = await RegistrationAPI.registerUser(email, password, name, phone, role);
-
-        RegistrationAPI.displayRegistrationResult(registrationSuccess); // Call displayRegistrationResult
-
-        if (registrationSuccess) {
-          Navigator.pop(context);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
-        }
-      } catch (error) {
-        displayToast("Registration failed");
-      }
-    } else {
-      displayToast("Passwords do not match.");
+    } catch (error) {
+      displayToast("Registration failed");
     }
   }
-
 
   void displayToast(String message) {
     Fluttertoast.showToast(
@@ -328,13 +457,12 @@ class RegistrationAPI {
       "password": password,
       "name": name,
       "phone": phone,
-      "role":role
+      "role":"Driver",
     };
 
     try {
       String? baseUrl = await AuthService.getURL();
       var response = await http.post(
-
         Uri.parse('$baseUrl/api/Account/Register'),
         headers: headers,
         body: json.encode(data),
@@ -356,7 +484,7 @@ class RegistrationAPI {
     if (registrationSuccess) {
       displayToast("Account created successfully!");
     } else {
-      displayToast("Registration failed. Please try again.");
+      displayToast("Registration failed. Please try changing Email or Phone number.");
     }
   }
 

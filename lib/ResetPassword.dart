@@ -9,7 +9,7 @@ class ResetPassword extends StatelessWidget {
 
   void _showPasswordResetDialog(BuildContext context, String email) async {
     // Make the API call to send password reset email
-    var apiUrl = 'http://logistics-api-8.somee.com/api/Account/ForgotPassword?email=$email';
+    var apiUrl = 'http://logistics-api-8.somee.com/api/Account/ForgotPassword/$email';
 
     try {
       var response = await http.post(

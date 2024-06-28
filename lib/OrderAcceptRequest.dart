@@ -87,7 +87,7 @@ class _OrderAcceptRequestState extends State<OrderAcceptRequest> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailItem('Order Id', widget.order.requestId),
+                    //_buildDetailItem('Order Id', widget.order.requestId),
                     _buildDetailItem('Pick Up Location', widget.order.pickUpLocation),
                     _buildDetailItem('Drop Off Location', widget.order.dropOffLocation),
                     _buildDetailItem('Time Stamp On Creation', widget.order.timeStampOnCreation),

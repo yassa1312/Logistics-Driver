@@ -64,7 +64,7 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
 
   void confirmEmail(String code) async {
     var url = Uri.parse(
-        'http://logistics-api-8.somee.com/api/Account/ConfirmEmail?code=$code');
+        'http://logistics-api-8.somee.com/api/Account/ConfirmEmail/$code');
     String? token = await AuthService.getAccessToken();
     try {
       var response = await http.post(

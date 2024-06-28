@@ -132,7 +132,7 @@ class _OrderViewMyDeliveredRequestsState extends State<OrderViewMyDeliveredReque
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
         startTripTime: '2022-04-10 10:00:00',
-        rideType: 'Premium',
+        rideType: 'Average Classic Box Truck',
       ),
       // Add more dummy orders as needed
     ];
@@ -212,7 +212,7 @@ class OrderTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildOrderInfo('Request ID:', order.requestId),
+              //_buildOrderInfo('Request ID:', order.requestId),
               _buildOrderInfo('Pick Up Location:', order.pickUpLocation),
               _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),

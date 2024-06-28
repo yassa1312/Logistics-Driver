@@ -134,7 +134,7 @@ class _ViewMyCanceledRequestsState extends State<ViewMyCanceledRequests> {
         dropOffLocation: 'Location D',
         timeStampOnCreation: '2022-04-11 12:00:00',
         startTripTime: '2022-04-10 10:00:00',
-        rideType: 'Premium',canceled_By:'Driver',
+        rideType: 'Average Classic Box Truck',canceled_By:'Driver',
       ),
       // Add more dummy orders as needed
     ];
@@ -214,7 +214,7 @@ class OrderTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildOrderInfo('Request ID:', order.requestId),
+              //_buildOrderInfo('Request ID:', order.requestId),
               _buildOrderInfo('Pick Up Location:', order.pickUpLocation),
               _buildOrderInfo('Drop Off Location:', order.dropOffLocation),
               _buildOrderInfo('Time Stamp On Creation:', order.timeStampOnCreation),

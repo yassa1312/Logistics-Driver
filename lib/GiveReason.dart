@@ -3,7 +3,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:logistics/auth_service.dart';
 import 'dart:convert';
-
 import 'package:logistics/main.dart';
 
 
@@ -35,7 +34,7 @@ class _GiveReasonState extends State<GiveReason> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailItem('Request Id', widget.requestId),
+            //_buildDetailItem('Request Id', widget.requestId),
             SizedBox(height: 20),
             TextField(
               onChanged: (value) {
@@ -49,8 +48,6 @@ class _GiveReasonState extends State<GiveReason> {
               ),
             ),
             SizedBox(height: 20),
-
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 await endTrip(widget.requestId, comment);
@@ -61,7 +58,6 @@ class _GiveReasonState extends State<GiveReason> {
               ),
               child: Text('Cancel Trip'),
             ),
-
           ],
         ),
       ),

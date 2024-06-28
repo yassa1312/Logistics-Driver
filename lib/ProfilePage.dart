@@ -28,6 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _carModelController = TextEditingController();
   final TextEditingController _capacityController = TextEditingController();
+  final TextEditingController _rateController = TextEditingController();
   late Uint8List _imageBytes = Uint8List(0);
   Uint8List? _carImageBytes;
   Uint8List? _idImage1Bytes;
@@ -84,6 +85,8 @@ class _ProfilePageState extends State<ProfilePage> {
               _colorController.text = carData['color'] ?? '';
               _carModelController.text = carData['car_Model'] ?? '';
               _capacityController.text = carData['capacity']?.toString() ?? '';
+
+              _rateController.text = carData['driver_Rating']?.toString() ?? '';
 
               if (carData["carImage"] != null) {
                 _carImageBytes = base64Decode(carData["carImage"]);
@@ -158,8 +161,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).pop(); // Close the dialog
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                textStyle: TextStyle(color: Colors.white),
+                foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                textStyle: TextStyle(fontSize: 18),
               ),
               child: const Text('Cancel'),
             ),
@@ -329,7 +332,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text('Profile'),
+        title: Text('Driver Profile'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -446,6 +449,7 @@ class _ProfilePageState extends State<ProfilePage> {
               SizedBox(height: 10),
               TextFormField(
                 controller: _phoneNumberController,
+                maxLength: 11,
                 decoration: InputDecoration(
                   labelText: 'Phone Number',
                   prefixIcon: Icon(Icons.phone, color: Colors.orange),
@@ -576,7 +580,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 controller: _rideTypeController,
                 decoration: const InputDecoration(
                   labelText: 'Ride_Type',
-                  prefixIcon: Icon(Icons.numbers,color: Colors.orange,),
+                  prefixIcon: Icon(Icons.local_shipping,color: Colors.orange,),
                   labelStyle: TextStyle(
                     color: Colors.orange,
                   ),
@@ -628,6 +632,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.front_loader,color: Colors.orange,),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _rateController,
+                      textInputAction: TextInputAction.next,
+                     keyboardType: TextInputType.number, // Set keyboardType to accept numbers only
+                      decoration: InputDecoration(
+                        labelText: 'Driver Rate',
+                        labelStyle: const TextStyle(
+                          color: Colors.orange,
+                        ),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.star_rate,color: Colors.orange,),
                       ),
                     ),
                   ],
