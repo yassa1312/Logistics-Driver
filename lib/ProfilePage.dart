@@ -271,7 +271,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
   Future<Map<String, dynamic>> confirmEmailCode() async {
-    String url = "http://logistics-api-8.somee.com/api/Account/ConfirmEmailCode";
+    String? baseUrl = await AuthService.getURL();
+    String url = "$baseUrl/api/Account/ConfirmEmailCode";
     String? token = await AuthService.getAccessToken();
     if (token == null) {
       // Handle case when token is not available
