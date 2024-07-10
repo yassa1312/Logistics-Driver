@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   static const _accessTokenKey = 'accessToken';
   static const String _urlKey = 'url'; // Key for storing URL in shared preferences
-  static const String _defaultURL = 'http://logistics-api-8.somee.com'; // Default URL
+  static const String _defaultURL = ''; // Default URL
 
   // Method to save URL to shared preferences
   static Future<void> saveURL(String url) async {
