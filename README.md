@@ -15,7 +15,7 @@ the video of the System:https://drive.google.com/file/d/113m3umnL6drXPlumU_jTWgH
 ![Screenshot 2024-05-17 220841](https://github.com/user-attachments/assets/4cc631c4-f57c-4277-b036-276109706a99)
 ![Screenshot 2024-05-18 214257](https://github.com/user-attachments/assets/8ff0365b-ceca-4714-a21e-1137891e4d61)
 ![Screenshot 2024-05-17 221229](https://github.com/user-attachments/assets/64e9bfe5-151b-4d15-a4cd-51c5ff8e4d7e)
-![Screenshot 2024-05-18 111452](https://github.com/user-attachments/assets/3f893c51-d938-46e3-9d56-7ecf81818ee9)
+
 ![Screenshot 2024-05-17 221031](https://github.com/user-attachments/assets/1b51ecea-154f-48b0-bc62-8f7696afba3f)
 ![Screenshot (11)](https://github.com/user-attachments/assets/e54b56ef-9e21-4132-a35f-f04ca6a2c9f7)
 ![Screenshot 2024-05-18 215652](https://github.com/user-attachments/assets/6d92360f-5bf6-4ce4-a33e-f10636207f40)
